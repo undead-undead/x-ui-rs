@@ -81,11 +81,12 @@ export const useSettingStore = create<SettingStore>()(
                 // 构造新地址
                 const protocol = window.location.protocol;
                 const hostname = window.location.hostname;
-                const fullUrl = `${protocol}//${hostname}:${panel.port}${normalizedWebRoot}`;
+                const newPort = panel.port; // 使用用户刚设置的新端口
+                const fullUrl = `${protocol}//${hostname}:${newPort}${normalizedWebRoot}`;
 
                 // 提示并跳转
                 useDialogStore.getState().showAlert(
-                    `配置已保存！\n\n页面将在 2 秒后跳转到：\n${fullUrl}\n\n⚠️ 请记住新地址！\n\n注意：端口或SSL配置的修改需要手动重启后端服务才能生效。`,
+                    `配置已保存！\n\n页面将在 2 秒后跳转到：\n${fullUrl}\n\n⚠️ 请记住新地址！\n\n注意：如果您在云服务器上修改了端口，请务必更新防火墙规则！`,
                     "保存成功 - 即将跳转"
                 );
 

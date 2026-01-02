@@ -32,8 +32,8 @@ const getPersistedWebRoot = () => {
         console.error('Failed to parse webRoot from storage', e);
     }
 
-    // 默认值：开发环境使用 /，生产环境使用 /panel/
-    return import.meta.env.DEV ? '/' : '/panel/';
+    // 默认值：开发环境使用 /，生产环境使用 /
+    return import.meta.env.DEV ? '/' : '/';
 };
 
 const basepath = getPersistedWebRoot();

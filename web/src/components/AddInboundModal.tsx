@@ -5,6 +5,7 @@ import { useInboundStore } from '../store/useInboundStore';
 import { useDialogStore } from '../store/useDialogStore';
 import { X } from 'lucide-react';
 import { Switch } from './ui/Switch';
+import { generateUUID } from '../utils/uuid';
 
 export const AddInboundModal = () => {
     const { t } = useTranslation();
@@ -23,7 +24,7 @@ export const AddInboundModal = () => {
 
     // === 协议配置 ===
     // VLESS/VMess
-    const [uuid, setUuid] = useState<string>(crypto.randomUUID());
+    const [uuid, setUuid] = useState<string>(generateUUID());
     const [flow, setFlow] = useState('');
     const [level, setLevel] = useState('0');
     const [email, setEmail] = useState('');
@@ -203,7 +204,7 @@ export const AddInboundModal = () => {
         setPort(String(Math.floor(Math.random() * 50000) + 10000));
         setTotalTraffic('0');
         setExpiryTime('');
-        setUuid(crypto.randomUUID());
+        setUuid(generateUUID());
         setFlow('');
         setLevel('0');
         setEmail('');
@@ -547,7 +548,7 @@ export const AddInboundModal = () => {
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm font-mono outline-none bg-white"
                             />
                             <button
-                                onClick={() => setUuid(crypto.randomUUID())}
+                                onClick={() => setUuid(generateUUID())}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
                             >
                                 {t('inbound.modal.generate')}

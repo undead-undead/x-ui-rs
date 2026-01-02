@@ -168,7 +168,7 @@ async fn main() -> anyhow::Result<()> {
 
     #[cfg(not(debug_assertions))]
     let cors_layer = CorsLayer::new()
-        .allow_origin(tower_http::cors::Any) // 生产环境通常前端也是同源的，或者配置具体的允许域
+        .allow_origin(tower_http::cors::Any) // 生产环境允许任意来源
         .allow_methods([
             Method::GET,
             Method::POST,
@@ -179,8 +179,7 @@ async fn main() -> anyhow::Result<()> {
         .allow_headers([
             axum::http::header::CONTENT_TYPE,
             axum::http::header::AUTHORIZATION,
-        ])
-        .allow_credentials(true);
+        ]); // 移除 allow_credentials(true) 以兼容 wildcard origin
 
     // 构建 API 路由
     let api_router = routes::create_router(pool, monitor)

@@ -27,15 +27,15 @@ BIN_PATH="$INSTALL_PATH/bin/x-ui-backend"
 XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
-# 真实发布地址
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v0.0.5/x-ui-linux-${arch}.tar.gz"
+# 真实发布地址 (v0.0.6)
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v0.0.6/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     if [[ -f /usr/bin/apt ]]; then
         apt update -y
-        apt install -y curl wget tar
+        apt install -y curl wget tar unzip
     elif [[ -f /usr/bin/yum ]]; then
-        yum install -y curl wget tar
+        yum install -y curl wget tar unzip
     fi
 }
 
@@ -57,6 +57,40 @@ enable_bbr() {
     fi
 }
 
+install_xray() {
+    if [[ -f "$XRAY_BIN_PATH" ]]; then
+        echo -e "${green}检测到 Xray Core 已存在，跳过安装${plain}"
+        return
+    fi
+
+    echo -e "${green}正在安装 Xray Core...${plain}"
+    local xray_arch=""
+    if [[ $arch == "amd64" ]]; then
+        xray_arch="64"
+    elif [[ $arch == "arm64" ]]; then
+        xray_arch="arm64-v8a"
+    fi
+    
+    local xray_zip="Xray-linux-${xray_arch}.zip"
+    # 使用官方最新版
+    local xray_url="https://github.com/XTLS/Xray-core/releases/latest/download/${xray_zip}"
+    
+    echo -e "${yellow}下载地址: ${xray_url}${plain}"
+    wget -N --no-check-certificate -q -O /tmp/xray.zip $xray_url
+    
+    if [[ $? -ne 0 ]]; then
+        echo -e "${red}Xray Core 下载失败，请检查网络连接！${plain}"
+        return 1
+    fi
+    
+    mkdir -p /tmp/xray_temp
+    unzip -o /tmp/xray.zip -d /tmp/xray_temp
+    mv /tmp/xray_temp/xray $XRAY_BIN_PATH
+    chmod +x $XRAY_BIN_PATH
+    rm -rf /tmp/xray_temp /tmp/xray.zip
+    echo -e "${green}Xray Core 安装完成${plain}"
+}
+
 install_x_ui() {
     echo -e "${green}开始安装 X-UI...${plain}"
     install_dependencies
@@ -69,7 +103,7 @@ install_x_ui() {
     mkdir -p $INSTALL_PATH/data
     mkdir -p $INSTALL_PATH/logs
 
-    # Download
+    # Download X-UI
     if [[ ! -f "x-ui-linux-${arch}.tar.gz" ]]; then
         echo -e "${yellow}正在下载发布包: ${RELEASE_URL}${plain}"
         wget -N --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
@@ -80,9 +114,13 @@ install_x_ui() {
         fi
     fi
 
+    # Extract
     tar -zxvf x-ui-linux-${arch}.tar.gz -C $INSTALL_PATH
     chmod +x $BIN_PATH
     
+    # Install Xray
+    install_xray
+
     # Init .env with default user inputs
     if [[ ! -f $ENV_FILE ]]; then
         read -p "请输入面板端口 (默认: 8080): " port
@@ -124,6 +162,10 @@ WantedBy=multi-user.target
 EOF
 
     systemctl daemon-reload
+    
+    # Auto Enable BBR
+    enable_bbr
+
     systemctl enable x-ui
     systemctl start x-ui
 
@@ -264,8 +306,7 @@ else
     show_menu
 fi
 EOF
-
-    chmod +x /usr/bin/x-ui
+    
     chmod +x /usr/bin/x-ui
     
     # 获取公网IP (尝试多个源)

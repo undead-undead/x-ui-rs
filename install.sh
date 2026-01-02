@@ -126,6 +126,9 @@ install_x_ui() {
         read -p "请输入面板端口 (默认: 8080): " port
         [[ -z $port ]] && port="8080"
         
+        read -p "请输入面板根路径 (默认: /): " web_root
+        [[ -z $web_root ]] && web_root="/"
+        
         # Random JWT secret
         jwt_secret=$(cat /proc/sys/kernel/random/uuid)
         
@@ -137,7 +140,7 @@ SERVER_HOST=0.0.0.0
 SERVER_PORT=$port
 XRAY_BIN_PATH=$XRAY_BIN_PATH
 XRAY_CONFIG_PATH=$INSTALL_PATH/data/xray.json
-WEB_ROOT=/
+WEB_ROOT=$web_root
 WEB_DIST_PATH=$INSTALL_PATH/bin/dist
 RUST_LOG=info
 EOF

@@ -6,8 +6,8 @@ import { useDialogStore } from './useDialogStore';
 const INITIAL_DATA: AllSettings = {
     panel: {
         listenIp: '',
-        port: 33789,
-        webRoot: '/23a/',
+        port: 0,
+        webRoot: '',
         sslCertPath: '',
         sslKeyPath: ''
     },

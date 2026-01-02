@@ -108,7 +108,7 @@ export const InboundPage = () => {
                                 style={{ padding: '5px 24px 4px 24px' }}
                             >
                                 <Plus size={16} strokeWidth={3} className="mr-2" />
-                                <span>{t('inbound.add_node')}</span>
+                                <span>{t('inbound.modal.title_add')}</span>
                             </button>
 
                             {/* Search Input */}

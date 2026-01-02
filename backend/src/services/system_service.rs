@@ -130,7 +130,8 @@ impl SystemMonitor {
             // First try systemctl if available (simplified check by just assuming if we can't find process easily)
             return self.mock_running; // using mock state for now to ensure UI works in dev
         }
-        self.mock_running
+        #[cfg(not(target_os = "linux"))]
+        return self.mock_running;
     }
 
     pub fn set_mock_running(&mut self, running: bool) {

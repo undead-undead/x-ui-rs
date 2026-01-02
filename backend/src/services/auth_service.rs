@@ -124,6 +124,7 @@ pub async fn change_password(
     Ok(())
 }
 
+/*
 /// 验证用户是否存在
 pub async fn get_user_by_id(pool: &SqlitePool, user_id: i64) -> ApiResult<User> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = ?")
@@ -134,6 +135,7 @@ pub async fn get_user_by_id(pool: &SqlitePool, user_id: i64) -> ApiResult<User> 
 
     Ok(user)
 }
+*/
 
 /// 更新用户凭据（用户名和密码）
 pub async fn update_credentials(

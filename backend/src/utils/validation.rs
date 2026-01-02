@@ -53,6 +53,7 @@ pub fn validate_password(password: &str) -> Result<(), ApiError> {
     Ok(())
 }
 
+/*
 /// 验证端口号
 /// 规则: 1024-65535 (避免使用系统保留端口)
 pub fn validate_port(port: u16) -> Result<(), ApiError> {
@@ -118,6 +119,7 @@ pub fn sanitize_string(input: &str) -> String {
         })
         .collect()
 }
+*/
 
 #[cfg(test)]
 mod tests {
@@ -149,6 +151,7 @@ mod tests {
         assert!(validate_password(&"a".repeat(129)).is_err()); // 太长
     }
 
+    /*
     #[test]
     fn test_validate_port() {
         // 有效的端口
@@ -180,4 +183,5 @@ mod tests {
         assert_eq!(sanitize_string("user@example.com"), "user@example.com");
         assert_eq!(sanitize_string("test\x00null"), "testnull");
     }
+    */
 }

@@ -88,6 +88,7 @@ pub async fn get_logs(_user: AuthUser) -> ApiResult<ApiResponse<Vec<String>>> {
     Ok(ApiResponse::success(logs))
 }
 
+/*
 /// POST /api/server/backup
 /// 备份配置
 pub async fn backup(_user: AuthUser) -> ApiResult<ApiResponse<String>> {
@@ -96,6 +97,7 @@ pub async fn backup(_user: AuthUser) -> ApiResult<ApiResponse<String>> {
         "Success",
     ))
 }
+*/
 
 /// GET /api/server/export-db
 /// 导出数据库文件
@@ -129,6 +131,7 @@ pub async fn export_db(_user: AuthUser) -> impl axum::response::IntoResponse {
     }
 }
 
+/*
 pub struct RestoreRequest {
     pub backup_id: String,
 }
@@ -139,6 +142,7 @@ pub async fn restore(
 ) -> ApiResult<ApiResponse<()>> {
     Ok(ApiResponse::success_no_data("Restore successful"))
 }
+*/
 
 /// POST /api/server/import-db
 /// 导入数据库文件

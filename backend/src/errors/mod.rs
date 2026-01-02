@@ -25,9 +25,10 @@ pub enum ApiError {
     #[error("Invalid input: {0}")]
     BadRequest(String),
 
+    /*
     #[error("Resource not found: {0}")]
     NotFound(String),
-
+    */
     #[error("Internal server error: {0}")]
     InternalError(String),
 
@@ -46,11 +47,16 @@ impl IntoResponse for ApiError {
         let (status, message) = match self {
             ApiError::Database(ref e) => {
                 tracing::error!("Database error: {:?}", e);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Database error".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Database error".to_string(),
+                )
             }
             ApiError::Unauthorized(ref msg) => (StatusCode::UNAUTHORIZED, msg.clone()),
             ApiError::BadRequest(ref msg) => (StatusCode::BAD_REQUEST, msg.clone()),
+            /*
             ApiError::NotFound(ref msg) => (StatusCode::NOT_FOUND, msg.clone()),
+            */
             ApiError::InternalError(ref msg) => {
                 tracing::error!("Internal error: {}", msg);
                 (StatusCode::INTERNAL_SERVER_ERROR, msg.clone())
@@ -61,7 +67,10 @@ impl IntoResponse for ApiError {
             }
             ApiError::PasswordHashError => {
                 tracing::error!("Password hashing failed");
-                (StatusCode::INTERNAL_SERVER_ERROR, "Authentication error".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Authentication error".to_string(),
+                )
             }
             ApiError::SystemError(ref msg) => {
                 tracing::error!("System error: {}", msg);

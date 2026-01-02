@@ -28,7 +28,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 # 真实发布地址
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v0.0.4/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v0.0.5/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     if [[ -f /usr/bin/apt ]]; then

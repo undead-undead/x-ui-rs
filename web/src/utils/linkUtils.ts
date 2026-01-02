@@ -71,11 +71,41 @@ export function generateShareLink(inbound: Inbound, serverAddr: string = window.
  * 复制文本到剪贴板
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
+    // 优先尝试现代 API (需要 HTTPS)
     try {
-        await navigator.clipboard.writeText(text);
-        return true;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
     } catch (err) {
-        console.error('Failed to copy: ', err);
+        console.warn('Navigator clipboard failed, trying fallback:', err);
+    }
+
+    // 回退方案：使用 textarea + execCommand (支持 HTTP)
+    try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+
+        // 确保元素不可见但可被选中
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '0';
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+
+        const success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+
+        if (success) {
+            return true;
+        } else {
+            console.error('Fallback execCommand failed');
+            return false;
+        }
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
         return false;
     }
 }

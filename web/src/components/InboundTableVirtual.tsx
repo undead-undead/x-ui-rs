@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useTranslation } from 'react-i18next';
 import type { Inbound } from '../types/inbound';
 import { formatTraffic } from '../utils/format';
 import { Switch } from './ui/Switch';
@@ -43,6 +44,7 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
     onQRCode,
     onCopy
 }) => {
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
@@ -97,32 +99,32 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
                                 onClick={() => onCopy(item)}
                                 icon={<Copy size={16} strokeWidth={2.5} />}
                             >
-                                复制链接
+                                {t('inbound.actions.copy_link')}
                             </DropdownItem>
                             <DropdownItem
                                 onClick={() => onQRCode(item)}
                                 icon={<QrCode size={16} strokeWidth={2.5} />}
                             >
-                                二维码
+                                {t('inbound.actions.qrcode')}
                             </DropdownItem>
                             <DropdownItem
                                 onClick={() => onReset(item.id)}
                                 icon={<RefreshCw size={16} strokeWidth={2.5} />}
                             >
-                                重置
+                                {t('inbound.actions.reset')}
                             </DropdownItem>
                             <DropdownItem
                                 onClick={() => onEdit(item)}
                                 icon={<Edit3 size={16} strokeWidth={2.5} />}
                             >
-                                编辑
+                                {t('inbound.actions.edit')}
                             </DropdownItem>
                             <DropdownItem
                                 onClick={() => onDelete(item.id)}
                                 variant="danger"
                                 icon={<Trash2 size={16} strokeWidth={2.5} />}
                             >
-                                删除
+                                {t('inbound.actions.delete')}
                             </DropdownItem>
                         </Dropdown>
                     </div>
@@ -133,6 +135,7 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
 });
 
 export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ inbounds, isEmbedded }) => {
+    const { t } = useTranslation();
     const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
     const { openModal } = useModalStore();
 
@@ -153,25 +156,25 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
 
     const handleDelete = useCallback((id: string) => {
         useDialogStore.getState().showConfirm(
-            '确定要删除此节点吗？',
+            t('inbound.confirm.delete_msg'),
             () => {
                 deleteInbound(id);
-                toast.success('节点已删除');
+                toast.success(t('inbound.confirm.delete_success'));
             },
-            '确认删除'
+            t('inbound.confirm.delete_title')
         );
-    }, [deleteInbound]);
+    }, [deleteInbound, t]);
 
     const handleReset = useCallback((id: string) => {
         useDialogStore.getState().showConfirm(
-            '确定要重置流量统计吗？',
+            t('inbound.confirm.reset_msg'),
             () => {
                 resetTraffic(id);
-                toast.success('流量统计已重置');
+                toast.success(t('inbound.confirm.reset_success'));
             },
-            '确认重置'
+            t('inbound.confirm.reset_title')
         );
-    }, [resetTraffic]);
+    }, [resetTraffic, t]);
 
     const handleEdit = useCallback((item: Inbound) => {
         openModal(item);
@@ -184,10 +187,10 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
     const handleCopy = useCallback((item: Inbound) => {
         const link = generateShareLink(item);
         copyToClipboard(link).then(success => {
-            if (success) toast.success('链接已复制到剪贴板');
-            else toast.error('复制失败');
+            if (success) toast.success(t('inbound.confirm.copy_success'));
+            else toast.error(t('inbound.confirm.copy_failed'));
         });
-    }, []);
+    }, [t]);
 
     const containerStyles = isEmbedded
         ? "w-full"
@@ -209,34 +212,34 @@ export const InboundTableVirtual: React.FC<InboundTableVirtualProps> = memo(({ i
                             <div className="flex items-center py-5 px-8">
                                 <div className="flex-[2.5] min-w-0">
                                     <span className="text-[12px] font-bold tracking-tight text-gray-500">
-                                        备注
+                                        {t('inbound.table.remark')}
                                     </span>
                                 </div>
                                 <div className="flex-1 min-w-0 px-4 text-center">
                                     <span className="text-[12px] font-bold tracking-tight text-gray-500">
-                                        类型
+                                        {t('inbound.table.type')}
                                     </span>
                                 </div>
                                 <div className="flex-1 min-w-0 px-4 text-center">
                                     <span className="text-[12px] font-bold tracking-tight text-gray-500">
-                                        端口
+                                        {t('inbound.table.port')}
                                     </span>
                                 </div>
                                 <div className="flex-[1.5] min-w-0 px-4">
                                     <span className="text-[12px] font-bold tracking-tight text-gray-500">
-                                        流量 ↑|↓
+                                        {t('inbound.table.traffic')}
                                     </span>
                                 </div>
                                 <div className="flex-1 min-w-0 px-4 text-center">
                                     <span className="text-[12px] font-bold tracking-tight text-gray-500">
-                                        状态
+                                        {t('inbound.table.status')}
                                     </span>
                                 </div>
                                 <div className="flex-2 min-w-0 px-4">
                                     <div className="flex justify-end pr-2">
                                         <div className="w-10 flex items-center justify-center">
                                             <span className="text-[12px] font-bold tracking-tight text-gray-500">
-                                                操作
+                                                {t('inbound.table.actions')}
                                             </span>
                                         </div>
                                     </div>

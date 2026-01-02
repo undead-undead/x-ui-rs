@@ -1,4 +1,5 @@
 import { useEffect, useState, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGlobalStore } from '../store/useGlobalStore';
 import { useLogsStore } from '../store/useLogsStore';
 import { useDialogStore } from '../store/useDialogStore';
@@ -37,6 +38,7 @@ StatusBar.displayName = 'StatusBar';
 
 
 export const Dashboard = () => {
+    const { t } = useTranslation();
     const { sysStatus, fetchStatus, restartXray, switchVersion } = useGlobalStore();
     const { showAlert, showConfirm } = useDialogStore();
     const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
@@ -48,52 +50,52 @@ export const Dashboard = () => {
     }, [fetchStatus]);
 
     const handleRestart = () => {
-        showConfirm('确定要重启 Xray 服务吗？这可能会导致短暂的连接中断。', async () => {
+        showConfirm(t('dashboard.restart_confirm_msg'), async () => {
             try {
                 await restartXray();
-                showAlert('重启命令已发送，请稍后刷新查看状态', '操作成功');
+                showAlert(t('dashboard.restart_success'), t('common.success') || 'Success');
                 fetchStatus();
             } catch (err: any) {
-                showAlert(err.message || '重启失败', '错误');
+                showAlert(err.message || t('dashboard.restart_failed'), t('common.error') || 'Error');
             }
-        }, '重启确认');
+        }, t('dashboard.restart_confirm_title'));
     };
 
     const handleVersionSelect = (version: string) => {
         setIsVersionModalOpen(false);
         if (version === sysStatus.xrayVersion) return;
 
-        showConfirm(`确定要将 Xray 版本切换为 ${version} 吗？`, async () => {
+        showConfirm(t('dashboard.switch_version_msg', { version }), async () => {
             try {
                 await switchVersion(version);
-                showAlert(`已发送版本切换请求: ${version}，请关注运行日志`, '操作成功');
+                showAlert(t('dashboard.switch_version_success', { version }), t('common.success') || 'Success');
             } catch (err: any) {
-                showAlert(err.message || '版本切换请求失败', '错误');
+                showAlert(err.message || t('dashboard.switch_version_failed'), t('common.error') || 'Error');
             }
-        }, '版本切换确认');
+        }, t('dashboard.switch_version_title'));
     };
 
     const handleToggleStatus = () => {
         if (sysStatus.xrayStatus === 'running') {
-            showConfirm('确定要停止 Xray 服务吗？', async () => {
+            showConfirm(t('dashboard.stop_confirm_msg'), async () => {
                 try {
                     await useGlobalStore.getState().stopXray();
-                    showAlert('停止命令已发送', '操作成功');
+                    showAlert(t('dashboard.stop_success'), t('common.success') || 'Success');
                     fetchStatus();
                 } catch (err: any) {
-                    showAlert(err.message || '停止失败', '错误');
+                    showAlert(err.message || t('dashboard.stop_failed'), t('common.error') || 'Error');
                 }
-            }, '停止确认');
+            }, t('dashboard.stop_confirm_title'));
         } else {
-            showConfirm('确定要启动 Xray 服务吗？', async () => {
+            showConfirm(t('dashboard.start_confirm_msg'), async () => {
                 try {
                     await useGlobalStore.getState().startXray();
-                    showAlert('启动命令已发送', '操作成功');
+                    showAlert(t('dashboard.start_success'), t('common.success') || 'Success');
                     fetchStatus();
                 } catch (err: any) {
-                    showAlert(err.message || '启动失败', '错误');
+                    showAlert(err.message || t('dashboard.start_failed'), t('common.error') || 'Error');
                 }
-            }, '启动确认');
+            }, t('dashboard.start_confirm_title'));
         }
     };
 
@@ -109,10 +111,10 @@ export const Dashboard = () => {
 
                 {/* 1. Top Circular Gauges - No Icons */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatusCircle percent={Math.round(sysStatus.cpu)} title="CPU" value="" />
-                    <StatusCircle percent={Math.round(sysStatus.mem.percent)} title="内存" value={`${sysStatus.mem.current} / ${sysStatus.mem.total}`} />
-                    <StatusCircle percent={Math.round(sysStatus.swap.percent)} title="SWAP" value={`${sysStatus.swap.current} / ${sysStatus.swap.total}`} />
-                    <StatusCircle percent={Math.round(sysStatus.disk.percent)} title="硬盘" value={`${sysStatus.disk.current} / ${sysStatus.disk.total}`} />
+                    <StatusCircle percent={Math.round(sysStatus.cpu)} title={t('dashboard.cpu')} value="" />
+                    <StatusCircle percent={Math.round(sysStatus.mem.percent)} title={t('dashboard.memory')} value={`${sysStatus.mem.current} / ${sysStatus.mem.total}`} />
+                    <StatusCircle percent={Math.round(sysStatus.swap.percent)} title={t('dashboard.swap')} value={`${sysStatus.swap.current} / ${sysStatus.swap.total}`} />
+                    <StatusCircle percent={Math.round(sysStatus.disk.percent)} title={t('dashboard.disk')} value={`${sysStatus.disk.current} / ${sysStatus.disk.total}`} />
                 </div >
 
                 {/* 2. Main Info Bars Grid - No Icons */}
@@ -131,7 +133,7 @@ export const Dashboard = () => {
 
                         <StatusBar>
                             <div className="flex items-center gap-4 text-sm font-bold">
-                                <span className="text-gray-900">Xray 状态:</span>
+                                <span className="text-gray-900">{t('dashboard.xray_status')}:</span>
                                 <span className="px-2 py-1 rounded bg-gray-50 text-gray-400 text-[11px] font-medium flex items-center gap-1.5 border border-gray-100/50">
                                     <div className={`w-1.5 h-1.5 rounded-full animate-pulse shadow-[0_0_8px_rgba(22,163,74,0.6)] ${sysStatus.xrayStatus === 'running' ? 'bg-green-600' : 'bg-red-500'}`} />
                                     {sysStatus.xrayStatus}
@@ -142,21 +144,21 @@ export const Dashboard = () => {
                                         className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
                                         style={{ padding: '5px 24px 4px 24px' }}
                                     >
-                                        <span>切换版本</span>
+                                        <span>{t('dashboard.switch_version')}</span>
                                     </button>
                                     <button
                                         onClick={handleToggleStatus}
                                         className={`flex items-center justify-center px-5 py-1.5 bg-white ${sysStatus.xrayStatus === 'running' ? 'text-orange-500' : 'text-green-600'} rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none`}
                                         style={{ padding: '5px 24px 4px 24px' }}
                                     >
-                                        <span>{sysStatus.xrayStatus === 'running' ? '停止' : '启动'}</span>
+                                        <span>{sysStatus.xrayStatus === 'running' ? t('dashboard.stop') : t('dashboard.start')}</span>
                                     </button>
                                     <button
                                         onClick={handleRestart}
                                         className="flex items-center justify-center px-5 py-1.5 bg-white text-red-600 rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
                                         style={{ padding: '5px 24px 4px 24px' }}
                                     >
-                                        <span>重启</span>
+                                        <span>{t('dashboard.restart')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -164,7 +166,7 @@ export const Dashboard = () => {
 
                         <StatusBar>
                             <div className="flex items-center gap-2 text-sm font-bold">
-                                <span className="text-gray-900">系统负载:</span>
+                                <span className="text-gray-900">{t('dashboard.load')}:</span>
                                 <span className="text-gray-400 font-mono font-medium">{sysStatus.load || "0 | 0 | 0"}</span>
                             </div>
                         </StatusBar>
@@ -172,11 +174,11 @@ export const Dashboard = () => {
                         <StatusBar>
                             <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
-                                    <span className="text-gray-900">上传速度:</span>
+                                    <span className="text-gray-900">{t('dashboard.up_speed')}:</span>
                                     <span className="tabular-nums text-gray-400 font-medium">{sysStatus.netTraffic.up || "0 B / S"}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
-                                    <span className="text-gray-900">下载速度:</span>
+                                    <span className="text-gray-900">{t('dashboard.down_speed')}:</span>
                                     <span className="tabular-nums text-gray-400 font-medium">{sysStatus.netTraffic.down || "0 B / S"}</span>
                                 </div>
                             </div>
@@ -187,8 +189,8 @@ export const Dashboard = () => {
                     < div className="space-y-4" >
                         <StatusBar>
                             <div className="flex items-center gap-2 text-sm font-bold">
-                                <span className="text-gray-900">运行时间:</span>
-                                <span className="px-2.5 py-0.5 rounded-lg bg-gray-50 text-gray-400 text-[12px] tabular-nums font-medium border border-gray-100/50">{sysStatus.uptime.split(' ')[0]} 天</span>
+                                <span className="text-gray-900">{t('dashboard.uptime')}:</span>
+                                <span className="px-2.5 py-0.5 rounded-lg bg-gray-50 text-gray-400 text-[12px] tabular-nums font-medium border border-gray-100/50">{sysStatus.uptime.split(' ')[0]} {t('dashboard.days')}</span>
                             </div>
                         </StatusBar>
 
@@ -201,7 +203,7 @@ export const Dashboard = () => {
                                         className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
                                         style={{ padding: '5px 24px 4px 24px' }}
                                     >
-                                        <span>查看运行日志</span>
+                                        <span>{t('dashboard.view_logs')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -209,7 +211,7 @@ export const Dashboard = () => {
 
                         <StatusBar>
                             <div className="flex items-center gap-2 text-sm font-bold">
-                                <span className="text-gray-900">tcp / udp 连接数:</span>
+                                <span className="text-gray-900">{t('dashboard.connections')}:</span>
                                 <span className="text-gray-400 tabular-nums font-medium">
                                     {sysStatus.tcpCount} / {sysStatus.udpCount}
                                 </span>
@@ -219,13 +221,13 @@ export const Dashboard = () => {
                         <StatusBar>
                             <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
-                                    <span className="text-gray-900">上传总流量:</span>
+                                    <span className="text-gray-900">{t('dashboard.total_up')}:</span>
                                     <span className="tabular-nums text-gray-400 font-medium">
                                         {sysStatus.netTraffic.totalUp}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
-                                    <span className="text-gray-900">下载总流量:</span>
+                                    <span className="text-gray-900">{t('dashboard.total_down')}:</span>
                                     <span className="tabular-nums text-gray-400 font-medium">
                                         {sysStatus.netTraffic.totalDown}
                                     </span>

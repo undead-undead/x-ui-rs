@@ -3,7 +3,11 @@ import { useSettingStore } from '../store/useSettingStore';
 import { Shield, User, Database, Zap, Terminal, Eye, EyeOff } from 'lucide-react';
 import { useBackupModalStore } from '../store/useBackupModalStore';
 
+import { useTranslation } from 'react-i18next';
+
 export const SettingsPage = () => {
+    const { t } = useTranslation();
+
     const [activeTab, setActiveTab] = useState('panel');
 
     // 性能优化：使用细粒度选择器
@@ -24,19 +28,21 @@ export const SettingsPage = () => {
         }
         const alphanumericRegex = /^[a-zA-Z0-9]+$/;
         if (!alphanumericRegex.test(value)) {
-            setErrors(prev => ({ ...prev, [field]: '仅支持字母和数字' }));
+            setErrors(prev => ({ ...prev, [field]: t('settings.errors.alphanumeric') }));
         } else {
+
             setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
     // 性能优化：使用 useMemo 缓存 tabs 数组
     const tabs = useMemo(() => [
-        { id: 'panel', label: '面板设置', icon: Shield },
-        { id: 'user', label: '用户管理', icon: User },
-        { id: 'backup', label: '备份恢复', icon: Database },
-        { id: 'advanced', label: '系统状态', icon: Zap },
-    ], []);
+        { id: 'panel', label: t('settings.tabs.panel'), icon: Shield },
+        { id: 'user', label: t('settings.tabs.user'), icon: User },
+        { id: 'backup', label: t('settings.tabs.backup'), icon: Database },
+        { id: 'advanced', label: t('settings.tabs.advanced'), icon: Zap },
+    ], [t]);
+
 
     // 性能优化：使用 useCallback 缓存回调函数
     const handleSave = useCallback(() => {
@@ -66,7 +72,7 @@ export const SettingsPage = () => {
                             className="flex items-center justify-center px-5 py-1.5 bg-white border border-black rounded-xl font-bold text-[13px] hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] text-black whitespace-nowrap leading-none"
                             style={{ padding: '5px 24px 4px 24px' }}
                         >
-                            <span>保存并重启面板</span>
+                            <span>{t('settings.save_restart')}</span>
                         </button>
                     </div>
                 </header>
@@ -94,14 +100,15 @@ export const SettingsPage = () => {
                         {activeTab === 'panel' && (
                             <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 tracking-tight">基础配置</h3>
-                                    <p className="text-xs font-medium text-gray-500 mt-1">面板核心网络与路径参数设定</p>
+                                    <h3 className="text-xl font-bold text-gray-900 tracking-tight">{t('settings.panel_config.title')}</h3>
+                                    <p className="text-xs font-medium text-gray-500 mt-1">{t('settings.panel_config.desc')}</p>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">面板端口</label>
+                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.port')}</label>
                                         <input
+
                                             type="number"
                                             value={panel.port}
                                             onChange={(e) => updatePanel({ port: Number(e.target.value) })}
@@ -109,8 +116,9 @@ export const SettingsPage = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">根路径 (WebRoot)</label>
+                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.web_root')}</label>
                                         <input
+
                                             type="text"
                                             value={panel.webRoot}
                                             onChange={(e) => {
@@ -127,13 +135,14 @@ export const SettingsPage = () => {
                                             }}
                                             className="w-full h-14 px-6 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-blue-500/50 transition-all text-gray-900 font-semibold tracking-tight text-[16px]"
                                             placeholder="/panel/"
-                                            title="输入路径，格式如 /panel/ 或 /admin/"
+                                            title={t('settings.panel_config.web_root_desc')}
                                         />
-                                        <p className="text-xs text-gray-400 ml-1">请输入完整路径（如 /panel/、/admin/），保存时会自动规范化格式</p>
+                                        <p className="text-xs text-gray-400 ml-1">{t('settings.panel_config.web_root_desc')}</p>
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">证书文件路径 (SSL Cert)</label>
+                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.ssl_cert')}</label>
                                         <input
+
                                             type="text"
                                             value={panel.sslCertPath}
                                             onChange={(e) => updatePanel({ sslCertPath: e.target.value })}
@@ -142,8 +151,9 @@ export const SettingsPage = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">密钥文件路径 (SSL Key)</label>
+                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.ssl_key')}</label>
                                         <input
+
                                             type="text"
                                             value={panel.sslKeyPath}
                                             onChange={(e) => updatePanel({ sslKeyPath: e.target.value })}
@@ -158,14 +168,15 @@ export const SettingsPage = () => {
                         {activeTab === 'user' && (
                             <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 tracking-tight">安全凭证</h3>
-                                    <p className="text-xs font-medium text-gray-500 mt-1">更新面板管理员登录账号与密码</p>
+                                    <h3 className="text-xl font-bold text-gray-900 tracking-tight">{t('settings.user_config.title')}</h3>
+                                    <p className="text-xs font-medium text-gray-500 mt-1">{t('settings.user_config.desc')}</p>
                                 </div>
+
 
                                 <div className="space-y-6 max-w-md">
                                     {/* 原用户名 */}
                                     <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">原用户名</label>
+                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.user_config.old_username')}</label>
                                         <input
                                             type="text"
                                             value={auth.oldUsername}
@@ -174,32 +185,35 @@ export const SettingsPage = () => {
                                                 updateAuth({ oldUsername: value });
                                             }}
                                             className="w-full h-14 px-6 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-gray-400 transition-all text-gray-900 font-semibold tracking-tight text-[16px]"
-                                            placeholder="当前管理员账号"
+                                            placeholder={t('settings.user_config.old_username_placeholder')}
                                         />
                                     </div>
 
+
                                     {/* 原密码 */}
                                     <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">原密码</label>
+                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.user_config.old_password')}</label>
                                         <input
                                             type="password"
                                             value={auth.oldPassword}
                                             onChange={(e) => updateAuth({ oldPassword: e.target.value })}
                                             className="w-full h-14 px-6 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-gray-400 transition-all text-gray-900 font-semibold tracking-tight text-[16px]"
-                                            placeholder="当前密码"
+                                            placeholder={t('settings.user_config.old_password_placeholder')}
                                         />
                                     </div>
+
 
                                     {/* 新用户名 */}
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end ml-1">
-                                            <label className="text-[13px] font-bold text-gray-500 tracking-tight">新用户名</label>
+                                            <label className="text-[13px] font-bold text-gray-500 tracking-tight">{t('settings.user_config.new_username')}</label>
                                             {errors.newUsername ? (
                                                 <span className="text-[11px] font-bold text-red-500 animate-pulse">{errors.newUsername}</span>
                                             ) : (
-                                                <span className="text-[11px] font-medium text-gray-400">仅限字母、数字</span>
+                                                <span className="text-[11px] font-medium text-gray-400">{t('settings.user_config.alphanumeric_only')}</span>
                                             )}
                                         </div>
+
                                         <input
                                             type="text"
                                             value={auth.newUsername}
@@ -209,20 +223,22 @@ export const SettingsPage = () => {
                                             }}
                                             onBlur={(e) => validateField('newUsername', e.target.value)}
                                             className={`w-full h-14 px-6 bg-gray-50 border ${errors.newUsername ? 'border-red-500 ring-1 ring-red-500/20' : 'border-gray-200'} rounded-2xl outline-none focus:bg-white focus:border-gray-400 transition-all text-gray-900 font-semibold tracking-tight text-[16px]`}
-                                            placeholder="输入新的管理员账号"
+                                            placeholder={t('settings.user_config.new_username_placeholder')}
                                         />
                                     </div>
+
 
                                     {/* 新密码 */}
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-end ml-1">
-                                            <label className="text-[13px] font-bold text-gray-500 tracking-tight">新密码</label>
+                                            <label className="text-[13px] font-bold text-gray-500 tracking-tight">{t('settings.user_config.new_password')}</label>
                                             {errors.newPassword ? (
                                                 <span className="text-[11px] font-bold text-red-500 animate-pulse">{errors.newPassword}</span>
                                             ) : (
-                                                <span className="text-[11px] font-medium text-gray-400">仅限字母、数字</span>
+                                                <span className="text-[11px] font-medium text-gray-400">{t('settings.user_config.alphanumeric_only')}</span>
                                             )}
                                         </div>
+
                                         <div className="relative">
                                             <input
                                                 type={showPassword ? "text" : "password"}
@@ -230,8 +246,9 @@ export const SettingsPage = () => {
                                                 onChange={(e) => updateAuth({ newPassword: e.target.value })}
                                                 onBlur={(e) => validateField('newPassword', e.target.value)}
                                                 className={`w-full h-14 px-6 pr-14 bg-gray-50 border ${errors.newPassword ? 'border-red-500 ring-1 ring-red-500/20' : 'border-gray-200'} rounded-2xl outline-none focus:bg-white focus:border-gray-400 transition-all text-gray-900 font-semibold tracking-tight text-[16px]`}
-                                                placeholder="输入新密码"
+                                                placeholder={t('settings.user_config.new_password_placeholder')}
                                             />
+
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
@@ -251,15 +268,15 @@ export const SettingsPage = () => {
                                     <Database size={48} strokeWidth={1.5} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-700 tracking-tight">数据库备份</h3>
-                                    <p className="text-gray-500 text-[14px] mt-2.5 font-medium max-w-xs mx-auto">系统支持对当前的 .db 数据库文件进行导出备份和导入恢复管理。</p>
+                                    <h3 className="text-xl font-bold text-gray-700 tracking-tight">{t('settings.backup.title')}</h3>
+                                    <p className="text-gray-500 text-[14px] mt-2.5 font-medium max-w-xs mx-auto">{t('settings.backup.desc')}</p>
                                 </div>
                                 <button
                                     onClick={() => useBackupModalStore.getState().open()}
                                     className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
                                     style={{ padding: '5px 24px 4px 24px' }}
                                 >
-                                    <span>管理备份与恢复</span>
+                                    <span>{t('settings.backup.manage_btn')}</span>
                                 </button>
                             </div>
                         )}
@@ -271,19 +288,19 @@ export const SettingsPage = () => {
                                         <Terminal size={22} strokeWidth={2.5} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900 tracking-tight">系统环境</h3>
-                                        <p className="text-xs font-medium text-gray-500 mt-1">内核状态与高级系统参数</p>
+                                        <h3 className="text-xl font-bold text-gray-900 tracking-tight">{t('settings.advanced.title')}</h3>
+                                        <p className="text-xs font-medium text-gray-500 mt-1">{t('settings.advanced.desc')}</p>
                                     </div>
                                 </div>
                                 <div className="p-8 bg-gray-50 rounded-3xl border border-gray-200 font-mono text-[14px] text-gray-500 space-y-3 leading-relaxed">
-                                    <p className="text-gray-600/60 font-bold">&gt; 节点会话已验证 (Node session authenticated)</p>
+                                    <p className="text-gray-600/60 font-bold">&gt; {t('settings.advanced.node_auth')}</p>
                                     <p className="flex items-center gap-2">
                                         <span className="text-gray-600">&gt;</span>
-                                        完整性自检: <span className="text-gray-600/80 font-bold">通过</span>
+                                        {t('settings.advanced.integrity_check')}: <span className="text-gray-600/80 font-bold">{t('settings.advanced.integrity_passed')}</span>
                                     </p>
                                     <p className="flex items-center gap-2">
                                         <span className="text-gray-600">&gt;</span>
-                                        面板运行状态: <span className="text-gray-600/80 font-bold">运行中</span>
+                                        {t('settings.advanced.panel_status')}: <span className="text-gray-600/80 font-bold">{t('settings.advanced.panel_running')}</span>
                                     </p>
                                     <div className="h-0.5 w-full bg-white/5 my-4" />
                                     <p className="text-gray-500 text-xs">Uptime: 284,591 seconds</p>

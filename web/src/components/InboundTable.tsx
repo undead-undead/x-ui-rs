@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Inbound } from '../types/inbound';
 import { formatTraffic } from '../utils/format';
 import { Switch } from './ui/Switch';
@@ -28,6 +29,7 @@ interface InboundRowProps {
 }
 
 const InboundRow = memo<InboundRowProps>(({ item, onToggle, onDelete, onReset, onEdit, onQRCode, onCopy }) => {
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
@@ -68,32 +70,32 @@ const InboundRow = memo<InboundRowProps>(({ item, onToggle, onDelete, onReset, o
                             onClick={() => onCopy(item)}
                             icon={<Copy size={16} strokeWidth={2.5} />}
                         >
-                            复制链接
+                            {t('inbound.actions.copy_link')}
                         </DropdownItem>
                         <DropdownItem
                             onClick={() => onQRCode(item)}
                             icon={<QrCode size={16} strokeWidth={2.5} />}
                         >
-                            二维码
+                            {t('inbound.actions.qrcode')}
                         </DropdownItem>
                         <DropdownItem
                             onClick={() => onReset(item.id)}
                             icon={<RefreshCw size={16} strokeWidth={2.5} />}
                         >
-                            重置
+                            {t('inbound.actions.reset')}
                         </DropdownItem>
                         <DropdownItem
                             onClick={() => onEdit(item)}
                             icon={<Edit3 size={16} strokeWidth={2.5} />}
                         >
-                            编辑
+                            {t('inbound.actions.edit')}
                         </DropdownItem>
                         <DropdownItem
                             onClick={() => onDelete(item.id)}
                             variant="danger"
                             icon={<Trash2 size={16} strokeWidth={2.5} />}
                         >
-                            删除
+                            {t('inbound.actions.delete')}
                         </DropdownItem>
                     </Dropdown>
                 </div>
@@ -116,6 +118,7 @@ const InboundRow = memo<InboundRowProps>(({ item, onToggle, onDelete, onReset, o
 InboundRow.displayName = 'InboundRow';
 
 export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmbedded }) => {
+    const { t } = useTranslation();
     const { toggleEnable, deleteInbound, resetTraffic } = useInboundStore();
     const { openModal } = useModalStore();
 
@@ -126,25 +129,25 @@ export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmb
 
     const handleDelete = useCallback((id: string) => {
         useDialogStore.getState().showConfirm(
-            '确定要删除该节点吗？此操作不可恢复。',
+            t('inbound.confirm.delete_msg'),
             async () => {
                 await deleteInbound(id);
-                toast.success('节点已删除');
+                toast.success(t('inbound.confirm.delete_success'));
             },
-            '确认删除'
+            t('inbound.confirm.delete_title')
         );
-    }, [deleteInbound]);
+    }, [deleteInbound, t]);
 
     const handleReset = useCallback((id: string) => {
         useDialogStore.getState().showConfirm(
-            '确定要重置该节点的流量统计吗？',
+            t('inbound.confirm.reset_msg'),
             async () => {
                 await resetTraffic(id);
-                toast.success('流量统计已重置');
+                toast.success(t('inbound.confirm.reset_success'));
             },
-            '确认重置'
+            t('inbound.confirm.reset_title')
         );
-    }, [resetTraffic]);
+    }, [resetTraffic, t]);
 
     const handleEdit = useCallback((item: Inbound) => {
         openModal(item);
@@ -157,10 +160,10 @@ export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmb
     const handleCopy = useCallback((item: Inbound) => {
         const link = generateShareLink(item);
         copyToClipboard(link).then(success => {
-            if (success) toast.success('链接已复制到剪贴板');
-            else toast.error('复制失败');
+            if (success) toast.success(t('inbound.confirm.copy_success'));
+            else toast.error(t('inbound.confirm.copy_failed'));
         });
-    }, []);
+    }, [t]);
 
     const containerStyles = isEmbedded
         ? "w-full"
@@ -172,15 +175,15 @@ export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmb
                 <table className="w-full min-w-[1000px] text-left border-collapse whitespace-nowrap">
                     <thead>
                         <tr className="border-b border-gray-200 bg-gray-50">
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">备注</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">类型</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">端口</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">流量 ↑|↓</th>
-                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500 text-center">状态</th>
+                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.remark')}</th>
+                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.type')}</th>
+                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.port')}</th>
+                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">{t('inbound.table.traffic')}</th>
+                            <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500 text-center">{t('inbound.table.status')}</th>
                             <th className="px-8 py-5 text-[12px] font-bold tracking-tight text-gray-500">
                                 <div className="flex justify-end pr-2">
                                     <div className="w-10 flex items-center justify-center">
-                                        操作
+                                        {t('inbound.table.actions')}
                                     </div>
                                 </div>
                             </th>
@@ -203,7 +206,7 @@ export const InboundTable: React.FC<InboundTableProps> = memo(({ inbounds, isEmb
                 </table>
                 {inbounds.length === 0 && (
                     <div className="p-20 text-center">
-                        <p className="text-gray-400 font-bold tracking-tight text-[15px]">暂无运行中的节点</p>
+                        <p className="text-gray-400 font-bold tracking-tight text-[15px]">{t('inbound.no_nodes')}</p>
                     </div>
                 )}
             </div>

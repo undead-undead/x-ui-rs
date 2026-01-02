@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useModalStore } from '../store/useModalStore';
 import { useInboundStore } from '../store/useInboundStore';
 import { useDialogStore } from '../store/useDialogStore';
@@ -6,6 +7,7 @@ import { X } from 'lucide-react';
 import { Switch } from './ui/Switch';
 
 export const AddInboundModal = () => {
+    const { t } = useTranslation();
     const { isOpen, closeModal, editingNode } = useModalStore();
     const { addInbound, updateInbound } = useInboundStore();
 
@@ -269,11 +271,11 @@ export const AddInboundModal = () => {
     const handleConfirm = () => {
         // 验证必填项
         if (!remark.trim()) {
-            useDialogStore.getState().showAlert('请输入备注名称', '验证失败');
+            useDialogStore.getState().showAlert(t('inbound.modal.remark_empty'), t('common.error') || 'Error');
             return;
         }
         if (!port || isNaN(Number(port))) {
-            useDialogStore.getState().showAlert('请输入有效的端口号', '验证失败');
+            useDialogStore.getState().showAlert(t('inbound.modal.port_error'), t('common.error') || 'Error');
             return;
         }
 
@@ -282,7 +284,7 @@ export const AddInboundModal = () => {
 
         if (protocol === 'vless' || protocol === 'vmess') {
             if (!uuid) {
-                useDialogStore.getState().showAlert('UUID 不能为空', '验证失败');
+                useDialogStore.getState().showAlert(t('inbound.modal.uuid_empty'), t('common.error') || 'Error');
                 return;
             }
             settings.clients = [{
@@ -297,7 +299,7 @@ export const AddInboundModal = () => {
             }
         } else if (protocol === 'trojan') {
             if (!password) {
-                useDialogStore.getState().showAlert('Trojan 密码不能为空', '验证失败');
+                useDialogStore.getState().showAlert(t('inbound.modal.password_empty'), t('common.error') || 'Error');
                 return;
             }
             settings.clients = [{
@@ -307,7 +309,7 @@ export const AddInboundModal = () => {
             }];
         } else if (protocol === 'shadowsocks') {
             if (!ssPassword) {
-                useDialogStore.getState().showAlert('Shadowsocks 密码不能为空', '验证失败');
+                useDialogStore.getState().showAlert(t('inbound.modal.password_empty'), t('common.error') || 'Error');
                 return;
             }
             settings = {
@@ -356,7 +358,7 @@ export const AddInboundModal = () => {
             };
         } else if (security === 'reality') {
             if (!realityPrivateKey) {
-                useDialogStore.getState().showAlert('Reality 私钥不能为空', '验证失败');
+                useDialogStore.getState().showAlert(t('inbound.modal.reality_private_key_empty'), t('common.error') || 'Error');
                 return;
             }
             streamSettings.realitySettings = {
@@ -422,7 +424,7 @@ export const AddInboundModal = () => {
                 {/* Header */}
                 <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 shrink-0">
                     <h2 className="text-lg font-bold text-gray-800">
-                        {editingNode ? '编辑节点' : '添加节点'}
+                        {editingNode ? t('inbound.modal.title_edit') : t('inbound.modal.title_add')}
                     </h2>
                     <button onClick={closeModal} className="text-gray-400 hover:text-black transition-colors">
                         <X size={20} />
@@ -433,22 +435,22 @@ export const AddInboundModal = () => {
                 <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 no-scrollbar text-black">
                     {/* 基础配置 */}
                     <div className="space-y-4">
-                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">基础配置</h3>
+                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.base_config')}</h3>
 
                         <div className="grid grid-cols-12 gap-4 items-center">
                             <div className="col-span-8 flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
-                                    <span className="text-red-500 mr-1">*</span>备注:
+                                    <span className="text-red-500 mr-1">*</span>{t('inbound.modal.remark')}:
                                 </label>
                                 <input
                                     value={remark}
                                     onChange={(e) => setRemark(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500 bg-white"
-                                    placeholder="节点备注名称"
+                                    placeholder={t('inbound.modal.remark_placeholder')}
                                 />
                             </div>
                             <div className="col-span-4 flex items-center gap-3 justify-end">
-                                <label className="text-sm font-bold text-gray-600">启用:</label>
+                                <label className="text-sm font-bold text-gray-600">{t('inbound.modal.enable')}:</label>
                                 <Switch checked={isEnable} onChange={setIsEnable} />
                             </div>
                         </div>
@@ -456,7 +458,7 @@ export const AddInboundModal = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
-                                    <span className="text-red-500 mr-1">*</span>协议:
+                                    <span className="text-red-500 mr-1">*</span>{t('inbound.modal.protocol')}:
                                 </label>
                                 <select
                                     value={protocol}
@@ -470,52 +472,52 @@ export const AddInboundModal = () => {
 
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
-                                    <span className="text-red-500 mr-1">*</span>端口:
+                                    <span className="text-red-500 mr-1">*</span>{t('inbound.modal.port')}:
                                 </label>
                                 <input
                                     value={port}
                                     onChange={(e) => setPort(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                    placeholder="1-65535"
+                                    placeholder={t('inbound.modal.port_placeholder')}
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">标签:</label>
+                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tag')}:</label>
                                 <input
                                     value={tag}
                                     onChange={(e) => setTag(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                    placeholder="自动生成"
+                                    placeholder={t('inbound.modal.tag_placeholder')}
                                 />
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">监听IP:</label>
+                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.listen')}:</label>
                                 <input
                                     value={listen}
                                     onChange={(e) => setListen(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                    placeholder="0.0.0.0"
+                                    placeholder={t('inbound.modal.listen_placeholder')}
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">总流量(GB):</label>
+                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.total_traffic')}:</label>
                                 <input
                                     value={totalTraffic}
                                     onChange={(e) => setTotalTraffic(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                    placeholder="0 = 无限制"
+                                    placeholder={t('inbound.modal.total_traffic_placeholder')}
                                 />
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">到期时间:</label>
+                                <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.expiry_time')}:</label>
                                 <input
                                     type="date"
                                     value={expiryTime}
@@ -529,11 +531,11 @@ export const AddInboundModal = () => {
 
                     {/* UUID 和流控 */}
                     <div className="space-y-4">
-                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">协议配置</h3>
+                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.protocol_config')}</h3>
 
                         <div className="flex items-center gap-3">
                             <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
-                                <span className="text-red-500 mr-1">*</span>UUID:
+                                <span className="text-red-500 mr-1">*</span>{t('inbound.modal.uuid')}:
                             </label>
                             <input
                                 value={uuid}
@@ -544,30 +546,30 @@ export const AddInboundModal = () => {
                                 onClick={() => setUuid(crypto.randomUUID())}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
                             >
-                                生成
+                                {t('inbound.modal.generate')}
                             </button>
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">流控:</label>
+                            <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.flow')}:</label>
                             <select
                                 value={flow}
                                 onChange={(e) => setFlow(e.target.value)}
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                             >
-                                <option value="">无</option>
+                                <option value="">{t('inbound.modal.flow_none')}</option>
                                 <option value="xtls-rprx-vision">xtls-rprx-vision</option>
                             </select>
-                            <span className="text-xs text-red-500 font-medium shrink-0">XHTTP 保持无流控</span>
+                            <span className="text-xs text-red-500 font-medium shrink-0">{t('inbound.modal.flow_xhttp_tip')}</span>
                         </div>
                     </div>
 
                     {/* 传输层配置 */}
                     <div className="space-y-4">
-                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">传输层配置</h3>
+                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.stream_config')}</h3>
 
                         <div className="flex items-center gap-3">
-                            <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">传输协议:</label>
+                            <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.network')}:</label>
                             <select
                                 value={network}
                                 onChange={(e) => setNetwork(e.target.value)}
@@ -581,39 +583,39 @@ export const AddInboundModal = () => {
                         {network === 'xhttp' && (
                             <>
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">模式:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.xhttp_mode')}:</label>
                                     <select
                                         value={xhttpMode}
                                         onChange={(e) => setXhttpMode(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     >
-                                        <option value="auto">自动 (推荐)</option>
-                                        <option value="packet-up">Packet Up (兼容性最强)</option>
-                                        <option value="stream-up">Stream Up (性能更好)</option>
-                                        <option value="stream-one">Stream One</option>
+                                        <option value="auto">{t('inbound.modal.xhttp_mode_auto')}</option>
+                                        <option value="packet-up">{t('inbound.modal.xhttp_mode_packet')}</option>
+                                        <option value="stream-up">{t('inbound.modal.xhttp_mode_stream')}</option>
+                                        <option value="stream-one">{t('inbound.modal.xhttp_mode_one')}</option>
                                     </select>
-                                    <span className="text-xs text-gray-500 shrink-0">默认: auto</span>
+                                    <span className="text-xs text-gray-500 shrink-0">{t('common.default')}: auto</span>
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">路径:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.xhttp_path')}:</label>
                                     <input
                                         value={xhttpPath}
                                         onChange={(e) => setXhttpPath(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder="/xhttp (推荐) 或 /"
+                                        placeholder={t('inbound.modal.xhttp_path_placeholder')}
                                     />
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">Host:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.xhttp_host')}:</label>
                                     <input
                                         value={xhttpHost}
                                         onChange={(e) => setXhttpHost(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder="留空使用默认值 (可选)"
+                                        placeholder={t('inbound.modal.xhttp_host_placeholder')}
                                     />
-                                    <span className="text-xs text-gray-500 shrink-0">可选</span>
+                                    <span className="text-xs text-gray-500 shrink-0">{t('inbound.modal.optional')}</span>
                                 </div>
                             </>
                         )}
@@ -621,10 +623,10 @@ export const AddInboundModal = () => {
 
                     {/* 安全层配置 */}
                     <div className="space-y-4">
-                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">安全层配置</h3>
+                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.security_config')}</h3>
 
                         <div className="flex items-center gap-3">
-                            <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">安全类型:</label>
+                            <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.security')}:</label>
                             <select
                                 value={security}
                                 onChange={(e) => {
@@ -636,7 +638,7 @@ export const AddInboundModal = () => {
                                 }}
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                             >
-                                <option value="none">无</option>
+                                <option value="none">{t('inbound.modal.security_none')}</option>
                                 <option value="tls">TLS</option>
                                 <option value="reality">Reality</option>
                             </select>
@@ -645,27 +647,27 @@ export const AddInboundModal = () => {
                         {security === 'tls' && (
                             <>
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">服务器名称:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tls_server_name')}:</label>
                                     <input
                                         value={tlsServerName}
                                         onChange={(e) => setTlsServerName(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder="example.com"
+                                        placeholder={t('inbound.modal.tls_server_name_placeholder')}
                                     />
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">ALPN:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tls_alpn')}:</label>
                                     <input
                                         value={tlsAlpn}
                                         onChange={(e) => setTlsAlpn(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder="h2,http/1.1"
+                                        placeholder={t('inbound.modal.tls_alpn_placeholder')}
                                     />
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">允许不安全:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tls_allow_insecure')}:</label>
                                     <Switch checked={tlsAllowInsecure} onChange={setTlsAllowInsecure} />
                                 </div>
                             </>
@@ -675,30 +677,30 @@ export const AddInboundModal = () => {
                             <>
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
-                                        <span className="text-red-500 mr-1">*</span>目标地址:
+                                        <span className="text-red-500 mr-1">*</span>{t('inbound.modal.reality_dest')}:
                                     </label>
                                     <input
                                         value={realityDest}
                                         onChange={(e) => setRealityDest(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder="www.microsoft.com:443"
+                                        placeholder={t('inbound.modal.reality_dest_placeholder')}
                                     />
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">服务器名称:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_server_names')}:</label>
                                     <textarea
                                         value={realityServerNames}
                                         onChange={(e) => setRealityServerNames(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white resize-none"
                                         rows={2}
-                                        placeholder="每行一个"
+                                        placeholder={t('inbound.modal.reality_server_names_placeholder')}
                                     />
                                 </div>
 
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">指纹:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_fingerprint')}:</label>
                                     <select
                                         value={realityFingerprint}
                                         onChange={(e) => setRealityFingerprint(e.target.value)}
@@ -717,13 +719,13 @@ export const AddInboundModal = () => {
                                         onClick={generateRealityKeys}
                                         className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
                                     >
-                                        生成 Reality 密钥
+                                        {t('inbound.modal.reality_keys_btn')}
                                     </button>
                                 </div>
 
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
-                                        <span className="text-red-500 mr-1">*</span>私钥:
+                                        <span className="text-red-500 mr-1">*</span>{t('inbound.modal.reality_private_key')}:
                                     </label>
                                     <input
                                         value={realityPrivateKey}
@@ -733,7 +735,7 @@ export const AddInboundModal = () => {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">公钥:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_public_key')}:</label>
                                     <input
                                         value={realityPublicKey}
                                         onChange={(e) => setRealityPublicKey(e.target.value)}
@@ -743,19 +745,19 @@ export const AddInboundModal = () => {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">短ID:</label>
+                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_short_ids')}:</label>
                                     <textarea
                                         value={realityShortIds}
                                         onChange={(e) => setRealityShortIds(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm font-mono outline-none bg-white resize-none"
                                         rows={2}
-                                        placeholder="每行一个,可留空"
+                                        placeholder={t('inbound.modal.reality_short_ids_placeholder')}
                                     />
                                     <button
                                         onClick={generateShortIds}
                                         className="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors shrink-0"
                                     >
-                                        生成
+                                        {t('inbound.modal.generate')}
                                     </button>
                                 </div>
                             </>
@@ -767,7 +769,7 @@ export const AddInboundModal = () => {
 
                     {/* Socket 选项 */}
                     <div className="space-y-4">
-                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">Socket 选项</h3>
+                        <h3 className="font-bold text-gray-700 text-sm border-b pb-2">{t('inbound.modal.socket_config')}</h3>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-3">
@@ -794,13 +796,13 @@ export const AddInboundModal = () => {
                         onClick={closeModal}
                         className="px-6 py-2 bg-white text-black rounded-lg text-sm font-bold border border-black hover:bg-gray-50 transition-colors"
                     >
-                        取消
+                        {t('inbound.modal.cancel')}
                     </button>
                     <button
                         onClick={handleConfirm}
                         className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors"
                     >
-                        {editingNode ? '保存' : '添加'}
+                        {editingNode ? t('common.save') : t('common.add')}
                     </button>
                 </div>
             </div>

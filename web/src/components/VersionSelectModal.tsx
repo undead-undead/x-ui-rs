@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Check, Loader2 } from 'lucide-react';
 import { sysApi } from '../api/system';
 import { toast } from 'react-hot-toast';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export const VersionSelectModal = ({ isOpen, currentVersion, onClose, onSelect }: Props) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [versions, setVersions] = useState<string[]>([]);
 
@@ -27,11 +29,11 @@ export const VersionSelectModal = ({ isOpen, currentVersion, onClose, onSelect }
             if (res.success) {
                 setVersions(res.obj);
             } else {
-                toast.error('获取版本列表失败');
+                toast.error(t('dashboard.fetch_versions_failed'));
             }
         } catch (error) {
             console.error(error);
-            toast.error('网络错误');
+            toast.error(t('common.network_error'));
         } finally {
             setLoading(false);
         }
@@ -49,7 +51,7 @@ export const VersionSelectModal = ({ isOpen, currentVersion, onClose, onSelect }
                 >
                     {/* Header */}
                     <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900">选择 Xray 版本</h3>
+                        <h3 className="text-lg font-bold text-gray-900">{t('dashboard.select_xray_version')}</h3>
                         <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                             <X className="w-5 h-5 text-gray-500" />
                         </button>

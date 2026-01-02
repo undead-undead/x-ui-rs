@@ -1,9 +1,11 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBackupModalStore } from '../store/useBackupModalStore';
 import { useSettingStore } from '../store/useSettingStore';
 import { X, Database, Download, Upload, AlertCircle } from 'lucide-react';
 
 export const BackupModal = () => {
+    const { t } = useTranslation();
     const { isOpen, close } = useBackupModalStore();
     const { exportDb, importDb } = useSettingStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -27,7 +29,7 @@ export const BackupModal = () => {
                             <Database size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-900 tracking-tight">备份与恢复</h2>
+                            <h2 className="text-xl font-bold text-gray-900 tracking-tight">{t('settings.backup.modal_title')}</h2>
                         </div>
                     </div>
                     <button
@@ -44,11 +46,11 @@ export const BackupModal = () => {
                         <AlertCircle className="text-gray-400 shrink-0" size={20} />
                         <div className="space-y-3">
                             <p className="text-[13px] font-bold text-gray-700 leading-relaxed">
-                                系统仅支持 <span className="text-gray-900">.db</span> 格式的数据库文件。
+                                {t('settings.backup.support_only')} <span className="text-gray-900">.db</span> {t('settings.backup.db_ext')}
                             </p>
                             <p className="text-[12px] font-medium text-gray-400 leading-relaxed">
-                                • 导出：保存当前所有节点和系统配置到本地。<br />
-                                • 导入：恢复之前的备份，完成后需要手动重启面板。
+                                {t('settings.backup.export_desc')}<br />
+                                {t('settings.backup.import_desc')}
                             </p>
                         </div>
                     </div>
@@ -67,7 +69,7 @@ export const BackupModal = () => {
                             <Download size={24} />
                         </div>
                         <div className="text-center">
-                            <p className="text-[15px] font-bold text-gray-900">立即导出</p>
+                            <p className="text-[15px] font-bold text-gray-900">{t('settings.backup.export_btn')}</p>
                         </div>
                     </button>
 
@@ -79,7 +81,7 @@ export const BackupModal = () => {
                             <Upload size={24} />
                         </div>
                         <div className="text-center">
-                            <p className="text-[15px] font-bold text-gray-900">导入文件</p>
+                            <p className="text-[15px] font-bold text-gray-900">{t('settings.backup.import_btn')}</p>
                         </div>
                         <input
                             type="file"

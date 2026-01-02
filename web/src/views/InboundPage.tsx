@@ -71,8 +71,8 @@ export const InboundPage = () => {
         } catch (error) {
             setCheckResult({
                 isValid: false,
-                message: '检测失败',
-                details: '请检查网络连接',
+                message: t('inbound.check_failed'),
+                details: t('inbound.check_network_error'),
             });
         } finally {
             setIsChecking(false);
@@ -130,7 +130,7 @@ export const InboundPage = () => {
                                     value={realityDomain}
                                     onChange={(e) => setRealityDomain(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleCheckDomain()}
-                                    placeholder="reality目标域名检测"
+                                    placeholder={t('inbound.reality_check_placeholder')}
                                     className="w-64 h-11 px-5 pr-12 bg-white border border-gray-300 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-black placeholder:text-gray-400 font-medium text-[13px]"
                                 />
 
@@ -141,7 +141,7 @@ export const InboundPage = () => {
                                     className="h-11 px-4 bg-blue-500 text-white rounded-xl text-[13px] font-bold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                                 >
                                     <Search size={16} />
-                                    {isChecking ? '检测中...' : '检测'}
+                                    {isChecking ? t('inbound.checking') : t('inbound.check')}
                                 </button>
 
                                 {/* 状态图标 */}
@@ -168,7 +168,7 @@ export const InboundPage = () => {
                                             <div className="text-xs opacity-80 mb-2">{displayResult.details}</div>
                                         )}
                                         {displayResult.score !== undefined && (
-                                            <div className="text-xs font-bold mb-2">评分: {displayResult.score}/100</div>
+                                            <div className="text-xs font-bold mb-2">{t('inbound.score')}: {displayResult.score}/100</div>
                                         )}
                                         {displayResult.warning && (
                                             <div className="mt-2 pt-2 border-t border-current/20 whitespace-pre-line text-xs leading-relaxed">
@@ -181,8 +181,8 @@ export const InboundPage = () => {
 
                             {/* Stats */}
                             <div className="flex items-center gap-6 text-[13px] font-bold text-gray-500">
-                                <span className="tabular-nums">节点总数: {inbounds.length}</span>
-                                <span className="tabular-nums">总流量: {totalTraffic}</span>
+                                <span className="tabular-nums">{t('inbound.total_count')}: {inbounds.length}</span>
+                                <span className="tabular-nums">{t('inbound.total_traffic')}: {totalTraffic}</span>
                             </div>
                         </div>
                     </div>

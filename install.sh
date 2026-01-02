@@ -321,14 +321,17 @@ EOF
     # 获取公网IP (尝试多个源)
     public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")
     
-    # 从 .env 读取端口，如果没找到则默认8080
+    # 从 .env 读取端口和根路径
     current_port=$(grep "SERVER_PORT" $ENV_FILE | cut -d '=' -f2)
     [[ -z $current_port ]] && current_port="8080"
+    
+    current_web_root=$(grep "WEB_ROOT" $ENV_FILE | cut -d '=' -f2)
+    [[ -z $current_web_root ]] && current_web_root="/"
 
     echo -e ""
     echo -e "${green}X-UI 安装成功！${plain}"
     echo -e "${green}----------------------------------------------${plain}"
-    echo -e "访问地址: ${yellow}http://${public_ip}:${current_port}${plain}"
+    echo -e "访问地址: ${yellow}http://${public_ip}:${current_port}${current_web_root}${plain}"
     echo -e "默认用户: ${yellow}admin${plain}"
     echo -e "默认密码: ${yellow}admin${plain}"
     echo -e "管理菜单: ${yellow}x-ui${plain}"

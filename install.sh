@@ -27,8 +27,8 @@ BIN_PATH="$INSTALL_PATH/bin/x-ui-backend"
 XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
-# 假设的下载地址，发布时需替换
-RELEASE_URL="https://github.com/undead-undead/x-ui/releases/latest/download/x-ui-linux-${arch}.tar.gz"
+# 真实发布地址
+RELEASE_URL="https://github.com/undead-undead/x-ui/releases/download/v0.0.1/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     if [[ -f /usr/bin/apt ]]; then
@@ -69,23 +69,19 @@ install_x_ui() {
     mkdir -p $INSTALL_PATH/data
     mkdir -p $INSTALL_PATH/logs
 
-    # Download (Mocking the download for now or creating placeholder if dev)
+    # Download
     if [[ ! -f "x-ui-linux-${arch}.tar.gz" ]]; then
-        echo -e "${yellow}正在下载发布包... (这是一个示例地址，实际使用请确保 Release 存在)${plain}"
-        # wget -N --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
-        echo -e "${red}下载链接暂不可用，请手动编译或上传 x-ui-linux-${arch}.tar.gz${plain}"
-        # Dev mode copy
-        if [[ -f "./target/release/x-ui-backend" ]]; then 
-             echo "检测到本地编译版本，直接使用..."
-             cp ./target/release/x-ui-backend $BIN_PATH
-             chmod +x $BIN_PATH
-        else
-             return 1
+        echo -e "${yellow}正在下载发布包: ${RELEASE_URL}${plain}"
+        wget -N --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
+        
+        if [[ $? -ne 0 ]]; then
+            echo -e "${red}下载失败，请检查网络连接或手动上传 x-ui-linux-${arch}.tar.gz${plain}"
+            return 1
         fi
-    else
-        tar -zxvf x-ui-linux-${arch}.tar.gz -C $INSTALL_PATH
-        chmod +x $BIN_PATH
     fi
+
+    tar -zxvf x-ui-linux-${arch}.tar.gz -C $INSTALL_PATH
+    chmod +x $BIN_PATH
     
     # Init .env with default user inputs
     if [[ ! -f $ENV_FILE ]]; then

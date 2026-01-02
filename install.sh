@@ -169,6 +169,12 @@ EOF
     # Auto Enable BBR
     enable_bbr
 
+    # 确保数据目录和数据库文件存在 (修复 musl SQLite 兼容性问题)
+    mkdir -p $INSTALL_PATH/data
+    touch $INSTALL_PATH/data/x-ui.db
+    chmod 755 $INSTALL_PATH/data
+    chmod 644 $INSTALL_PATH/data/x-ui.db
+
     systemctl enable x-ui
     systemctl start x-ui
 

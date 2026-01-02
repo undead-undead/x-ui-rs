@@ -266,7 +266,24 @@ fi
 EOF
 
     chmod +x /usr/bin/x-ui
-    echo -e "${green}X-UI 安装完成！输入 x-ui 可管理面板。${plain}"
+    chmod +x /usr/bin/x-ui
+    
+    # 获取公网IP (尝试多个源)
+    public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")
+    
+    # 从 .env 读取端口，如果没找到则默认8080
+    current_port=$(grep "SERVER_PORT" $ENV_FILE | cut -d '=' -f2)
+    [[ -z $current_port ]] && current_port="8080"
+
+    echo -e ""
+    echo -e "${green}X-UI 安装成功！${plain}"
+    echo -e "${green}----------------------------------------------${plain}"
+    echo -e "访问地址: ${yellow}http://${public_ip}:${current_port}${plain}"
+    echo -e "默认用户: ${yellow}admin${plain}"
+    echo -e "默认密码: ${yellow}admin${plain}"
+    echo -e "管理菜单: ${yellow}x-ui${plain}"
+    echo -e "${green}----------------------------------------------${plain}"
+    echo -e "${yellow}如果是云服务器，请务必确保防火墙/安全组已放行 ${current_port} 端口${plain}"
 }
 
 # Install Entry

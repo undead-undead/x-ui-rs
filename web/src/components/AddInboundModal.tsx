@@ -252,7 +252,7 @@ export const AddInboundModal = () => {
     };
 
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         // 验证必填项
         if (!remark.trim()) {
             useDialogStore.getState().showAlert(t('inbound.modal.remark_empty'), t('common.error') || 'Error');
@@ -383,9 +383,9 @@ export const AddInboundModal = () => {
         };
 
         if (editingNode) {
-            updateInbound(data);
+            await updateInbound(data);
         } else {
-            addInbound(data);
+            await addInbound(data);
         }
         closeModal();
     };

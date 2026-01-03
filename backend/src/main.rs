@@ -11,7 +11,6 @@ mod utils;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use axum::extract::State;
 use axum::http::Method;
 use axum::response::IntoResponse;
 use axum::Router;
@@ -234,10 +233,6 @@ async fn main() -> anyhow::Result<()> {
     if let Ok(cwd) = std::env::current_dir() {
         tracing::info!("Current Working Directory: {:?}", cwd);
     }
-    tracing::info!("Using web dist path: {}", dist_path);
-
-    // 动态处理 index.html 的注入
-    let index_dist_path = dist_path.clone();
     // 动态处理 index.html 的注入
     let index_dist_path = dist_path.clone();
     let index_handler = move |req: axum::http::Request<axum::body::Body>| async move {
@@ -309,19 +304,13 @@ async fn main() -> anyhow::Result<()> {
     let app = if base_path.is_empty() || base_path == "/" {
         router.with_state(())
     } else {
-        // 核心修复：不要对同一个路径同时使用 route() 和 nest()，否则会 Panic
         let subpath = base_path.clone();
-        let redirect_to = format!("{}/", subpath);
-
         Router::new()
             .nest(&subpath, router)
             .fallback(
                 move |req: axum::http::Request<axum::body::Body>| async move {
-                    // 如果用户访问的是不带斜杠的子路径，重定向到带斜杠的版本
-                    if req.uri().path() == subpath {
-                        return axum::response::Redirect::permanent(&redirect_to).into_response();
-                    }
-                    // 否则返回 404
+                    // 如果访问根目录且没有被 nest 截获，返回 404 (符合用户隐身需求)
+                    tracing::debug!("Global fallback reached for path: {}", req.uri().path());
                     axum::http::StatusCode::NOT_FOUND.into_response()
                 },
             )

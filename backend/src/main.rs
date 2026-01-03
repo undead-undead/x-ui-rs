@@ -309,21 +309,22 @@ async fn main() -> anyhow::Result<()> {
     let app = if base_path.is_empty() || base_path == "/" {
         router.with_state(())
     } else {
-        // 关键逻辑：
-        // 1. 确保在 /123 (无斜杠) 时触发重定向到 /123/
-        // 2. 确保 / (根路径) 也重定向到 /123/
+        // 核心修复：不要对同一个路径同时使用 route() 和 nest()，否则会 Panic
         let subpath = base_path.clone();
-        let subpath_with_slash = format!("{}/", subpath);
-        let redirect_to = subpath_with_slash.clone();
+        let redirect_to = format!("{}/", subpath);
 
         Router::new()
-            .route(
-                &subpath,
-                axum::routing::get(move || async move {
-                    axum::response::Redirect::permanent(&redirect_to)
-                }),
-            )
             .nest(&subpath, router)
+            .fallback(
+                move |req: axum::http::Request<axum::body::Body>| async move {
+                    // 如果用户访问的是不带斜杠的子路径，重定向到带斜杠的版本
+                    if req.uri().path() == subpath {
+                        return axum::response::Redirect::permanent(&redirect_to).into_response();
+                    }
+                    // 否则返回 404
+                    axum::http::StatusCode::NOT_FOUND.into_response()
+                },
+            )
             .with_state(())
     };
 

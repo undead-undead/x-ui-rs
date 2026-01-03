@@ -192,6 +192,8 @@ export const AddInboundModal = () => {
         } else if (isOpen) {
             // 重置为默认值
             resetForm();
+            // 自动生成 Reality 密钥对（Base64 格式）
+            generateRealityKeys();
         }
     }, [isOpen, editingNode]);
 
@@ -240,16 +242,7 @@ export const AddInboundModal = () => {
         setRealityMaxClientVer('');
         setRealityMaxTimeDiff('');
         setAcceptProxyProtocol(false);
-        setTcpFastOpen(true);
         setTcpNoDelay(true);
-
-        // 自动生成 Reality 密钥对
-        const mockPriv = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-            .map(b => b.toString(16).padStart(2, '0')).join('');
-        const mockPub = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-            .map(b => b.toString(16).padStart(2, '0')).join('');
-        setRealityPrivateKey(mockPriv);
-        setRealityPublicKey(mockPub);
     };
 
     const generateRealityKeys = () => {

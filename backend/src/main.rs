@@ -276,7 +276,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // 路由逻辑 - 关键：API 路由必须在 fallback 之前
-    let base_path = normalized_web_root.trim_end_matches('/');
+    let base_path = normalized_web_root.trim_end_matches('/').to_string();
 
     let router = Router::new()
         .merge(api_router) // 直接合并路由，不再重复加 /api 前缀
@@ -284,21 +284,51 @@ async fn main() -> anyhow::Result<()> {
         .route("/index.html", axum::routing::get(index_handler.clone()))
         .fallback_service(file_service); // 静态文件最后
 
-    let app = if base_path.is_empty() {
+    let app = if base_path.is_empty() || base_path == "/" {
         router.with_state(())
     } else {
-        // 使用 nest 处理子路径，Axum 会自动处理前缀剥离
-        Router::new().nest(base_path, router).with_state(())
+        let redirect_path = base_path.clone();
+
+        // 规范化 nest 路径（Axum nest 需要一致的前缀）
+        let nest_path = if base_path.ends_with('/') && base_path.len() > 1 {
+            base_path[..base_path.len() - 1].to_string()
+        } else {
+            base_path.clone()
+        };
+
+        let subpath_no_slash = nest_path.clone();
+        let subpath_with_slash = format!("{}/", subpath_no_slash);
+
+        Router::new()
+            // 1. 访问 / 跳转到子路径
+            .route(
+                "/",
+                axum::routing::get(move || async move {
+                    axum::response::Redirect::permanent(&redirect_path)
+                }),
+            )
+            // 2. 访问 /subpath (无斜杠) 跳转到 /subpath/
+            .route(
+                &subpath_no_slash,
+                axum::routing::get(move || async move {
+                    axum::response::Redirect::permanent(&subpath_with_slash)
+                }),
+            )
+            // 3. 实际业务逻辑嵌套
+            .nest(&subpath_no_slash, router)
+            .with_state(())
     };
 
     tracing::info!(
         "Web Root: {}",
         if web_root.is_empty() { "/" } else { &web_root }
     );
+    tracing::info!("Using web dist path: {}", dist_path);
     tracing::info!("安全中间件已启用: CSP, X-Frame-Options, X-XSS-Protection");
 
     let port = std::env::var("SERVER_PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
+    tracing::info!("Server listening on http://{}", addr);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     tracing::info!(
         "X-UI Backend listening on http://{}",

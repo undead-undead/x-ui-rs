@@ -110,7 +110,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.47/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.48/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -353,6 +353,9 @@ EOF
     echo
     [[ -z $admin_pass ]] && admin_pass="admin"
     
+    # 设置初始账户密码前先停止服务，避免数据库锁竞争
+    systemctl stop x-ui 
+    
     # 使用后端命令行工具设置账户
     cd $INSTALL_PATH
     echo -e "${yellow}Setting up admin account...${plain}"
@@ -362,6 +365,7 @@ EOF
         admin_user="admin"
         admin_pass="admin"
     fi
+    systemctl start x-ui
     
     # 获取公网IP
     public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")

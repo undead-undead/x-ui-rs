@@ -207,7 +207,14 @@ pub async fn update_config(
     _user: AuthUser,
     Json(req): Json<UpdateConfigReq>,
 ) -> ApiResult<ApiResponse<()>> {
-    let env_path = std::path::Path::new(".env");
+    // 尝试使用绝对路径，以防 CWD 不正确
+    let env_path_str = if std::path::Path::new("/usr/local/x-ui/.env").exists() {
+        "/usr/local/x-ui/.env"
+    } else {
+        ".env"
+    };
+    let env_path = std::path::Path::new(env_path_str);
+
     let content = tokio::fs::read_to_string(env_path)
         .await
         .unwrap_or_default();

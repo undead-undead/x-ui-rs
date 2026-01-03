@@ -305,8 +305,11 @@ async fn main() -> anyhow::Result<()> {
         router.with_state(())
     } else {
         let subpath = base_path.clone();
+        // 关键修复：nest 的路径不应该包含末尾斜杠，否则可能匹配不到 /path/
+        let nest_path = subpath.trim_end_matches('/').to_string();
+
         Router::new()
-            .nest(&subpath, router)
+            .nest(&nest_path, router)
             .fallback(
                 move |req: axum::http::Request<axum::body::Body>| async move {
                     // 如果访问根目录且没有被 nest 截获，返回 404 (符合用户隐身需求)

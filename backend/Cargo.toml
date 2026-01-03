@@ -56,8 +56,8 @@ futures-util = "0.3.31"
 # 内存分配优化
 mimalloc = "0.1"
 [profile.release]
-opt-level = "z"      # 极致优化体积和初始内存占用
-lto = "thin"         # 开启链接时优化
+opt-level = "s"      # 平衡体积和速度，往往比 'z' 更有利于运行时内存
+lto = true           # 开启全量 LTO (编译变慢但优化更彻底)
 codegen-units = 1    # 提高优化质量
 panic = "abort"      # 移除 panic 展开信息，减小约几百KB体积和内存
 strip = true         # 自动移除调试符号

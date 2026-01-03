@@ -209,13 +209,19 @@ async fn main() -> anyhow::Result<()> {
     // 优先读取环境变量，其次尝试搜索
     let env_dist_path = std::env::var("WEB_DIST_PATH").unwrap_or_default();
 
-    let candidates = vec![
-        env_dist_path.as_str(),
+    let mut candidates = vec![
         "./bin/dist",
         "./dist",
         "../web/dist",
         "dist",
+        "/usr/local/x-ui/bin/dist",
+        "/usr/local/x-ui/dist",
     ];
+
+    // 如果环境变量设置了路径，将其作为首选候选（插到最前面）
+    if !env_dist_path.is_empty() {
+        candidates.insert(0, env_dist_path.as_str());
+    }
 
     let mut dist_path = "./bin/dist".to_string(); // Default fallback
     for path in candidates {

@@ -305,25 +305,14 @@ async fn main() -> anyhow::Result<()> {
         router.with_state(())
     } else {
         let subpath = base_path.clone(); // 例如 "/123"
-                                         // 确保 subpath 不含末尾斜杠 (虽然上面 trims 了，这里再次确保逻辑清晰)
-        let subpath_clean = subpath.trim_end_matches('/').to_string();
+                                         // 关键修复：nest 的路径不应该包含末尾斜杠
+        let nest_path = subpath.trim_end_matches('/').to_string();
 
         Router::new()
-            // 1. 处理 /123 (不带斜杠) -> 跳转到 /123/
-            // 使用动态 redirect，不写死任何路径
-            .route(
-                &subpath_clean,
-                axum::routing::get(
-                    move |req: axum::http::Request<axum::body::Body>| async move {
-                        let path = req.uri().path();
-                        let new_path = format!("{}/", path);
-                        axum::response::Redirect::permanent(&new_path)
-                    },
-                ),
-            )
-            // 2. 处理 /123/... 所有子路径 (包括 /123/)
-            .nest(&subpath_clean, router)
-            // 3. 全局兜底
+            // 只使用 nest，移除显式的 route(&subpath_clean) 以避免 "Overlapping method route" Panic
+            // Axum 的 nest 会自动处理前缀匹配
+            .nest(&nest_path, router)
+            // 全局兜底
             .fallback(
                 move |req: axum::http::Request<axum::body::Body>| async move {
                     tracing::debug!("Global fallback 404: {}", req.uri().path());

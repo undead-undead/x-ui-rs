@@ -205,23 +205,28 @@ async fn main() -> anyhow::Result<()> {
         .layer(cors_layer);
 
     // 静态文件服务
+    // 静态文件服务
     // 默认寻找同级目录下的 web/dist 或 ./dist（部署时结构）
-    let dist_path = std::env::var("WEB_DIST_PATH").unwrap_or_else(|_| "./bin/dist".to_string());
-    // 如果找不到，尝试 fallback 到相对路径（开发模式）
-    let dist_path = if std::path::Path::new(&dist_path).exists() {
-        dist_path
-    } else if std::path::Path::new("../web/dist").exists() {
-        "../web/dist".to_string()
-    } else {
-        "./dist".to_string()
-    };
+    // 增加更多路径检查
+    let candidates = vec!["./bin/dist", "./dist", "../web/dist", "dist"];
 
+    let mut dist_path = "./bin/dist".to_string(); // Default
+    for path in candidates {
+        if std::path::Path::new(path).exists() {
+            dist_path = path.to_string();
+            break;
+        }
+    }
+
+    if let Ok(cwd) = std::env::current_dir() {
+        tracing::info!("Current Working Directory: {:?}", cwd);
+    }
     tracing::info!("Using web dist path: {}", dist_path);
 
     // 动态处理 index.html 的注入
     let index_dist_path = dist_path.clone();
     let index_handler = move |State(_): State<()>| async move {
-        // ... (keep existing logic)
+        // ... (keep logic)
         let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
         let path = std::path::Path::new(&index_dist_path).join("index.html");
 
@@ -236,15 +241,15 @@ async fn main() -> anyhow::Result<()> {
                     .into_response()
             }
             Err(e) => {
-                tracing::error!("Failed to read index.html: {}", e);
+                tracing::error!("Failed to read index.html at {:?}: {}", path, e);
                 (axum::http::StatusCode::NOT_FOUND, "index.html not found").into_response()
             }
         }
     };
 
     // Chain the static service with the index fallback
-    let file_service =
-        tower_http::services::ServeDir::new(&dist_path).fallback(axum::routing::get(index_handler));
+    let file_service = tower_http::services::ServeDir::new(&dist_path)
+        .fallback(axum::routing::get(index_handler.clone()));
 
     // 获取 WEB_ROOT (默认 /)
     let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
@@ -258,15 +263,13 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // 路由逻辑
-    // API 挂载在 /api，静态文件挂载在 /
-    // Nest 逻辑：
-    // 如果 web_root 是 /，则直接挂载
-    // 如果 web_root 是 /path/，则 nest 到 /path
     let base_path = normalized_web_root.trim_end_matches('/');
 
     let router = Router::new()
+        .route("/", axum::routing::get(index_handler.clone()))
+        .route("/index.html", axum::routing::get(index_handler.clone()))
         .nest("/api", api_router)
-        .fallback_service(file_service); // Use the chained service
+        .fallback_service(file_service);
 
     let app = if base_path.is_empty() {
         router.with_state(())

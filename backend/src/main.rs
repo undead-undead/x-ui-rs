@@ -275,14 +275,14 @@ async fn main() -> anyhow::Result<()> {
         normalized_web_root = format!("{}/", normalized_web_root);
     }
 
-    // 路由逻辑
+    // 路由逻辑 - 关键：API 路由必须在 fallback 之前
     let base_path = normalized_web_root.trim_end_matches('/');
 
     let router = Router::new()
+        .nest("/api", api_router) // API 路由优先
         .route("/", axum::routing::get(index_handler.clone()))
         .route("/index.html", axum::routing::get(index_handler.clone()))
-        .nest("/api", api_router)
-        .fallback_service(file_service);
+        .fallback_service(file_service); // 静态文件最后
 
     let app = if base_path.is_empty() {
         router.with_state(())

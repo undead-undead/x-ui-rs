@@ -279,9 +279,6 @@ async fn main() -> anyhow::Result<()> {
     let base_path = normalized_web_root.trim_end_matches('/');
 
     let router = Router::new()
-        // 关键修复：显式处理空路径，用于匹配嵌套后的根路径（例如 /subpath 剥离后变为 ""）
-        // 这样可以避免请求落入 fallback 并返回未经处理的 index.html
-        .route("", axum::routing::get(index_handler.clone()))
         .route("/", axum::routing::get(index_handler.clone()))
         .route("/index.html", axum::routing::get(index_handler.clone()))
         .nest("/api", api_router)

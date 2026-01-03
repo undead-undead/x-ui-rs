@@ -50,26 +50,16 @@ export const useSettingStore = create<SettingStore>()(
                 let normalizedWebRoot = panel.webRoot.trim();
                 normalizedWebRoot = normalizedWebRoot.replace(/\/+/g, '/'); // 清理连续斜杠
 
-                // 如果为空或只有斜杠，使用默认值
-                if (!normalizedWebRoot || normalizedWebRoot === '/') {
-                    normalizedWebRoot = '/panel/';
-                } else {
-                    if (!normalizedWebRoot.startsWith('/')) {
-                        normalizedWebRoot = '/' + normalizedWebRoot;
-                    }
-                    if (!normalizedWebRoot.endsWith('/')) {
-                        normalizedWebRoot = normalizedWebRoot + '/';
-                    }
+                // 规范化：确保以 / 开头
+                if (!normalizedWebRoot.startsWith('/')) {
+                    normalizedWebRoot = '/' + normalizedWebRoot;
                 }
 
-                // 限制：不允许使用根路径 /
-                if (normalizedWebRoot === '/') {
-                    useDialogStore.getState().showAlert(
-                        "出于安全考虑，不允许将根路径设置为 /\n\n请设置一个具体的路径，例如：\n/panel/\n/admin/\n/x-ui/",
-                        "配置错误"
-                    );
-                    return;
+                // 如果不是根路径，确保以 / 结尾
+                if (normalizedWebRoot.length > 1 && !normalizedWebRoot.endsWith('/')) {
+                    normalizedWebRoot = normalizedWebRoot + '/';
                 }
+
 
                 // 保存配置
                 const updatedPanel = { ...panel, webRoot: normalizedWebRoot };

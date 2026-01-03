@@ -177,7 +177,7 @@
             "desc": "面板核心网络与路径参数设定",
             "port": "面板端口",
             "web_root": "根路径 (WebRoot)",
-            "web_root_desc": "请输入完整路径（如 /panel/、/admin/），保存时会自动规范化格式",
+            "web_root_desc": "请输入完整路径（如 /admin/），保存时会自动规范化格式",
             "ssl_cert": "证书文件路径 (SSL Cert)",
             "ssl_key": "密钥文件路径 (SSL Key)"
         },

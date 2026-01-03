@@ -130,11 +130,11 @@ export const SettingsPage = () => {
                                             onBlur={(e) => {
                                                 // 失去焦点时，如果为空则设置为默认值
                                                 if (!e.target.value.trim()) {
-                                                    updatePanel({ webRoot: '/panel/' });
+                                                    updatePanel({ webRoot: '/' });
                                                 }
                                             }}
                                             className="w-full h-14 px-6 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-blue-500/50 transition-all text-gray-900 font-semibold tracking-tight text-[16px]"
-                                            placeholder="/panel/"
+                                            placeholder="/"
                                             title={t('settings.panel_config.web_root_desc')}
                                         />
                                         <p className="text-xs text-gray-400 ml-1">{t('settings.panel_config.web_root_desc')}</p>

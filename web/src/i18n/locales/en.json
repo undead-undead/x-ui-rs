@@ -177,7 +177,7 @@
             "desc": "Panel core network and path parameters",
             "port": "Panel Port",
             "web_root": "Web Root Path",
-            "web_root_desc": "Enter full path (e.g., /panel/, /admin/), it will be normalized automatically on save",
+            "web_root_desc": "Enter full path (e.g., /admin/), it will be normalized automatically on save",
             "ssl_cert": "SSL Certificate Path",
             "ssl_key": "SSL Private Key Path"
         },

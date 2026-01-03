@@ -39,6 +39,43 @@ install_dependencies() {
     fi
 }
 
+open_port() {
+    local port=$1
+    echo -e "${yellow}正在尝试放行端口 ${port}...${plain}"
+    
+    # Check UFW
+    if command -v ufw >/dev/null 2>&1; then
+        if ufw status | grep -q "Status: active"; then
+            ufw allow ${port}/tcp >/dev/null 2>&1
+            ufw allow ${port}/udp >/dev/null 2>&1
+            echo -e "${green}UFW 端口 ${port} 已放行${plain}"
+        fi
+    fi
+    
+    # Check firewalld
+    if command -v firewall-cmd >/dev/null 2>&1; then
+        if systemctl is-active --quiet firewalld; then
+            firewall-cmd --permanent --add-port=${port}/tcp >/dev/null 2>&1
+            firewall-cmd --permanent --add-port=${port}/udp >/dev/null 2>&1
+            firewall-cmd --reload >/dev/null 2>&1
+            echo -e "${green}Firewalld 端口 ${port} 已放行${plain}"
+        fi
+    fi
+    
+    # Check iptables (basic fallback)
+    if command -v iptables >/dev/null 2>&1; then
+        iptables -I INPUT -p tcp --dport ${port} -j ACCEPT >/dev/null 2>&1
+        iptables -I INPUT -p udp --dport ${port} -j ACCEPT >/dev/null 2>&1
+        # Save iptables if possible
+        if command -v netfilter-persistent >/dev/null 2>&1; then
+            netfilter-persistent save >/dev/null 2>&1
+        elif command -v service >/dev/null 2>&1 && service iptables status >/dev/null 2>&1; then
+            service iptables save >/dev/null 2>&1
+        fi
+        echo -e "${green}Iptables 端口 ${port} 已放行${plain}"
+    fi
+}
+
 enable_bbr() {
     echo -e "${yellow}正在检测 BBR 状态...${plain}"
     if sysctl net.ipv4.tcp_congestion_control | grep -q bbr; then
@@ -124,6 +161,7 @@ install_x_ui() {
     if [[ ! -f $ENV_FILE ]]; then
         read -p "请输入面板端口 (默认: 8080): " port
         [[ -z $port ]] && port="8080"
+        open_port $port
         
         read -p "请输入面板根路径 (直接回车使用根路径 /，不推荐自定义): " web_root
         [[ -z $web_root ]] && web_root="/"
@@ -210,6 +248,43 @@ check_root() {
     [[ $EUID -ne 0 ]] && echo -e "${red}错误: 必须使用 root 用户运行此脚本！${plain}" && exit 1
 }
 
+open_port() {
+    local port=$1
+    echo -e "${yellow}正在尝试放行端口 ${port}...${plain}"
+    
+    # Check UFW
+    if command -v ufw >/dev/null 2>&1; then
+        if ufw status | grep -q "Status: active"; then
+            ufw allow ${port}/tcp >/dev/null 2>&1
+            ufw allow ${port}/udp >/dev/null 2>&1
+            echo -e "${green}UFW 端口 ${port} 已放行${plain}"
+        fi
+    fi
+    
+    # Check firewalld
+    if command -v firewall-cmd >/dev/null 2>&1; then
+        if systemctl is-active --quiet firewalld; then
+            firewall-cmd --permanent --add-port=${port}/tcp >/dev/null 2>&1
+            firewall-cmd --permanent --add-port=${port}/udp >/dev/null 2>&1
+            firewall-cmd --reload >/dev/null 2>&1
+            echo -e "${green}Firewalld 端口 ${port} 已放行${plain}"
+        fi
+    fi
+    
+    # Check iptables (basic fallback)
+    if command -v iptables >/dev/null 2>&1; then
+        iptables -I INPUT -p tcp --dport ${port} -j ACCEPT >/dev/null 2>&1
+        iptables -I INPUT -p udp --dport ${port} -j ACCEPT >/dev/null 2>&1
+        # Save iptables if possible
+        if command -v netfilter-persistent >/dev/null 2>&1; then
+            netfilter-persistent save >/dev/null 2>&1
+        elif command -v service >/dev/null 2>&1 && service iptables status >/dev/null 2>&1; then
+            service iptables save >/dev/null 2>&1
+        fi
+        echo -e "${green}Iptables 端口 ${port} 已放行${plain}"
+    fi
+}
+
 # 辅助函数：修改 .env
 update_env() {
     local key=$1
@@ -230,6 +305,7 @@ status() { systemctl status x-ui; }
 set_port() {
     read -p "请输入新端口: " port
     [[ -z $port ]] && echo -e "${red}端口不能为空${plain}" && return
+    open_port $port
     update_env "SERVER_PORT" "$port"
     restart
     echo -e "${green}端口已修改为: $port${plain}"

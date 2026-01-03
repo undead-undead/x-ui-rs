@@ -215,22 +215,36 @@ install_x_ui() {
 
     # Download X-UI
     i18n "xui_downloading" "$RELEASE_URL"
+    
+    # Work in /tmp directory
+    cd /tmp || { echo -e "${red}Failed to cd to /tmp${plain}"; return 1; }
     rm -f x-ui-linux-${arch}.tar.gz
     
     # Use -L to follow redirects from GitHub
     if command -v wget &> /dev/null; then
-        wget -L --no-check-certificate -O x-ui-linux-${arch}.tar.gz "$RELEASE_URL"
+        echo "Using wget to download..."
+        wget -L --no-check-certificate -O x-ui-linux-${arch}.tar.gz "$RELEASE_URL" 2>&1
     elif command -v curl &> /dev/null; then
-        curl -L -o x-ui-linux-${arch}.tar.gz "$RELEASE_URL"
+        echo "Using curl to download..."
+        curl -L -o x-ui-linux-${arch}.tar.gz "$RELEASE_URL" 2>&1
     else
         echo -e "${red}Error: Neither wget nor curl is available${plain}"
         return 1
     fi
     
-    if [[ $? -ne 0 ]] || [[ ! -f x-ui-linux-${arch}.tar.gz ]]; then
+    if [[ $? -ne 0 ]]; then
+        echo -e "${red}Download command failed with exit code: $?${plain}"
         i18n "xui_fail"
         return 1
     fi
+    
+    if [[ ! -f x-ui-linux-${arch}.tar.gz ]]; then
+        echo -e "${red}Downloaded file not found: $(pwd)/x-ui-linux-${arch}.tar.gz${plain}"
+        i18n "xui_fail"
+        return 1
+    fi
+    
+    echo "Download successful: $(ls -lh x-ui-linux-${arch}.tar.gz)"
 
     # Extract
     tar -zxvf x-ui-linux-${arch}.tar.gz -C $INSTALL_PATH

@@ -11,7 +11,7 @@ plain="\033[0m"
 # Language Selection
 echo -e "1. 简体中文"
 echo -e "2. English"
-read -p "请选择语言 / Please select language [1-2] (default 1): " lang_choice
+read -p "请选择语言 / Please select language [1-2] (default 1): " lang_choice < /dev/tty
 [[ -z $lang_choice ]] && lang_choice="1"
 
 if [[ $lang_choice == "2" ]]; then
@@ -268,13 +268,13 @@ install_x_ui() {
 
     # Input Port
     printf "$(i18n "input_port")"
-    read -p "($default_port): " port
+    read -p "($default_port): " port < /dev/tty
     [[ -z $port ]] && port=$default_port
     open_port $port
     
     # Input Web Root
     printf "$(i18n "input_root")"
-    read -p "($default_web_root): " web_root
+    read -p "($default_web_root): " web_root < /dev/tty
     [[ -z $web_root ]] && web_root=$default_web_root
     
     # Normalize Web Root
@@ -345,10 +345,10 @@ EOF
     
     # 设置初始账户密码
     i18n "setting_admin"
-    read -p "$(i18n "input_user")" admin_user
+    read -p "$(i18n "input_user")" admin_user < /dev/tty
     [[ -z $admin_user ]] && admin_user="admin"
     
-    read -s -p "$(i18n "input_pass")" admin_pass
+    read -s -p "$(i18n "input_pass")" admin_pass < /dev/tty
     echo
     [[ -z $admin_pass ]] && admin_pass="admin"
     

@@ -206,13 +206,20 @@ async fn main() -> anyhow::Result<()> {
 
     // 静态文件服务
     // 静态文件服务
-    // 默认寻找同级目录下的 web/dist 或 ./dist（部署时结构）
-    // 增加更多路径检查
-    let candidates = vec!["./bin/dist", "./dist", "../web/dist", "dist"];
+    // 优先读取环境变量，其次尝试搜索
+    let env_dist_path = std::env::var("WEB_DIST_PATH").unwrap_or_default();
 
-    let mut dist_path = "./bin/dist".to_string(); // Default
+    let candidates = vec![
+        env_dist_path.as_str(),
+        "./bin/dist",
+        "./dist",
+        "../web/dist",
+        "dist",
+    ];
+
+    let mut dist_path = "./bin/dist".to_string(); // Default fallback
     for path in candidates {
-        if std::path::Path::new(path).exists() {
+        if !path.is_empty() && std::path::Path::new(path).exists() {
             dist_path = path.to_string();
             break;
         }

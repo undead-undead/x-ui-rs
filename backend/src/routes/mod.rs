@@ -65,9 +65,16 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
         .layer(axum::Extension(pool.clone()))
         .with_state(monitor.clone()); // SharedMonitor needed for apply_config
 
+    // Xray 工具路由（无需认证，用于前端生成密钥）
+    let xray_routes = Router::new().route(
+        "/generate-reality-keys",
+        get(crate::handlers::xray::generate_reality_keys),
+    );
+
     // 组合所有路由
     Router::new()
         .nest("/api/auth", auth_routes)
         .nest("/api/server", system_routes)
         .nest("/api/inbound", inbound_routes)
+        .nest("/api/xray", xray_routes)
 }

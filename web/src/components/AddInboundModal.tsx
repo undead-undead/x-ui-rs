@@ -232,17 +232,16 @@ export const AddInboundModal = () => {
         setTcpNoDelay(true);
     };
 
-    const generateRealityKeys = () => {
-        // 生成 32 字节随机数据
-        const privBytes = crypto.getRandomValues(new Uint8Array(32));
-        const pubBytes = crypto.getRandomValues(new Uint8Array(32));
-
-        // 转换为 Base64 (Xray Reality 要求的格式)
-        const privBase64 = btoa(String.fromCharCode(...privBytes));
-        const pubBase64 = btoa(String.fromCharCode(...pubBytes));
-
-        setRealityPrivateKey(privBase64);
-        setRealityPublicKey(pubBase64);
+    const generateRealityKeys = async () => {
+        try {
+            const { generateRealityKeys: apiGenerateKeys } = await import('../api/xray');
+            const keys = await apiGenerateKeys();
+            setRealityPrivateKey(keys.private_key);
+            setRealityPublicKey(keys.public_key);
+        } catch (error) {
+            console.error('Failed to generate Reality keys:', error);
+            useDialogStore.getState().showAlert('生成密钥失败，请重试', '错误');
+        }
     };
 
     const generateShortIds = () => {

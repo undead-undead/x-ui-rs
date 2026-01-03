@@ -29,6 +29,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/undead-undead/x-ui-rs/main/ins
 - **🚀 High Performance**: Rewritten in Rust (Axum + SQLx), with extremely low memory footprint.
 - **🌍 Bilingual Support**: Complete Chinese (Simplified) and English support for both Installer and Web UI.
 - **🛡️ Secure**: Built-in JWT authentication with token freshness validation.
+- **🔍 Reality Validation**: Built-in Reality target domain reachability check to ensure connectivity.
 - **⚡ BBR Support**: One-click BBR enablement.
 - **🔧 Built-in Management**: Simple `x-ui` command to manage your panel from the terminal.
 

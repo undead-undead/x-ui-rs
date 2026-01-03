@@ -66,11 +66,6 @@ export const AddInboundModal = () => {
     // === 安全层配置 ===
     const [security, setSecurity] = useState('none');
 
-    // TLS
-    const [tlsServerName, setTlsServerName] = useState('');
-    const [tlsAlpn, setTlsAlpn] = useState('h2,http/1.1');
-    const [tlsAllowInsecure, setTlsAllowInsecure] = useState(false);
-
     // Reality
     const [realityShow, setRealityShow] = useState(false);
     const [realityDest, setRealityDest] = useState('www.microsoft.com:443');
@@ -157,12 +152,7 @@ export const AddInboundModal = () => {
                     setXhttpHost(stream.xhttpSettings.host || '');
                 }
 
-                // TLS
-                if (stream.tlsSettings) {
-                    setTlsServerName(stream.tlsSettings.serverName || '');
-                    setTlsAlpn(stream.tlsSettings.alpn?.join(',') || 'h2,http/1.1');
-                    setTlsAllowInsecure(stream.tlsSettings.allowInsecure || false);
-                }
+
 
                 // Reality
                 if (stream.realitySettings) {
@@ -227,9 +217,6 @@ export const AddInboundModal = () => {
         setXhttpPath('/');
         setXhttpHost('');
         setSecurity('none');
-        setTlsServerName('');
-        setTlsAlpn('h2,http/1.1');
-        setTlsAllowInsecure(false);
         setRealityShow(false);
         setRealityDest('www.microsoft.com:443');
         setRealityXver('0');
@@ -348,13 +335,7 @@ export const AddInboundModal = () => {
         }
 
         // 添加安全层配置
-        if (security === 'tls') {
-            streamSettings.tlsSettings = {
-                ...(tlsServerName && { serverName: tlsServerName }),
-                ...(tlsAlpn && { alpn: tlsAlpn.split(',').map(a => a.trim()) }),
-                allowInsecure: tlsAllowInsecure,
-            };
-        } else if (security === 'reality') {
+        if (security === 'reality') {
             if (!realityPrivateKey) {
                 useDialogStore.getState().showAlert(t('inbound.modal.reality_private_key_empty'), t('common.error') || 'Error');
                 return;
@@ -637,39 +618,11 @@ export const AddInboundModal = () => {
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                             >
                                 <option value="none">{t('inbound.modal.security_none')}</option>
-                                <option value="tls">TLS</option>
                                 <option value="reality">Reality</option>
                             </select>
                         </div>
 
-                        {security === 'tls' && (
-                            <>
-                                <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tls_server_name')}:</label>
-                                    <input
-                                        value={tlsServerName}
-                                        onChange={(e) => setTlsServerName(e.target.value)}
-                                        className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder={t('inbound.modal.tls_server_name_placeholder')}
-                                    />
-                                </div>
 
-                                <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tls_alpn')}:</label>
-                                    <input
-                                        value={tlsAlpn}
-                                        onChange={(e) => setTlsAlpn(e.target.value)}
-                                        className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
-                                        placeholder={t('inbound.modal.tls_alpn_placeholder')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tls_allow_insecure')}:</label>
-                                    <Switch checked={tlsAllowInsecure} onChange={setTlsAllowInsecure} />
-                                </div>
-                            </>
-                        )}
 
                         {security === 'reality' && (
                             <>

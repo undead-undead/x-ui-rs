@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useSettingStore } from '../store/useSettingStore';
-import { Shield, User, Database, Zap, Terminal, Eye, EyeOff } from 'lucide-react';
+import { Shield, User, Database, Eye, EyeOff } from 'lucide-react';
 import { useBackupModalStore } from '../store/useBackupModalStore';
 
 import { useTranslation } from 'react-i18next';
@@ -40,7 +40,7 @@ export const SettingsPage = () => {
         { id: 'panel', label: t('settings.tabs.panel'), icon: Shield },
         { id: 'user', label: t('settings.tabs.user'), icon: User },
         { id: 'backup', label: t('settings.tabs.backup'), icon: Database },
-        { id: 'advanced', label: t('settings.tabs.advanced'), icon: Zap },
+
     ], [t]);
 
 
@@ -281,32 +281,6 @@ export const SettingsPage = () => {
                             </div>
                         )}
 
-                        {activeTab === 'advanced' && (
-                            <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="flex items-center gap-4 mb-2">
-                                    <div className="w-12 h-12 bg-gray-200 rounded-2xl flex items-center justify-center text-gray-600 shadow-sm">
-                                        <Terminal size={22} strokeWidth={2.5} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-900 tracking-tight">{t('settings.advanced.title')}</h3>
-                                        <p className="text-xs font-medium text-gray-500 mt-1">{t('settings.advanced.desc')}</p>
-                                    </div>
-                                </div>
-                                <div className="p-8 bg-gray-50 rounded-3xl border border-gray-200 font-mono text-[14px] text-gray-500 space-y-3 leading-relaxed">
-                                    <p className="text-gray-600/60 font-bold">&gt; {t('settings.advanced.node_auth')}</p>
-                                    <p className="flex items-center gap-2">
-                                        <span className="text-gray-600">&gt;</span>
-                                        {t('settings.advanced.integrity_check')}: <span className="text-gray-600/80 font-bold">{t('settings.advanced.integrity_passed')}</span>
-                                    </p>
-                                    <p className="flex items-center gap-2">
-                                        <span className="text-gray-600">&gt;</span>
-                                        {t('settings.advanced.panel_status')}: <span className="text-gray-600/80 font-bold">{t('settings.advanced.panel_running')}</span>
-                                    </p>
-                                    <div className="h-0.5 w-full bg-white/5 my-4" />
-                                    <p className="text-gray-500 text-xs">Uptime: 284,591 seconds</p>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

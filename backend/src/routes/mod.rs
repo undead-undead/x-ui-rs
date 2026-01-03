@@ -73,8 +73,8 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
 
     // 组合所有路由
     Router::new()
-        .nest("/api/auth", auth_routes)
-        .nest("/api/server", system_routes)
-        .nest("/api/inbound", inbound_routes)
-        .nest("/api/xray", xray_routes)
+        .nest("/auth", auth_routes)
+        .nest("/server", system_routes)
+        .nest("/inbound", inbound_routes)
+        .nest("/xray", xray_routes)
 }

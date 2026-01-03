@@ -18,15 +18,20 @@ pub struct SystemMonitor {
 
 impl SystemMonitor {
     pub fn new() -> Self {
-        let mut sys = System::new_all();
-        sys.refresh_all();
+        // 使用 new() 而不是 new_all()，避免初始化进程列表等大对象
+        let mut sys = System::new();
+        sys.refresh_cpu_all();
+        sys.refresh_memory();
+
+        // 初始刷新
         let disks = Disks::new_with_refreshed_list();
         let networks = Networks::new_with_refreshed_list();
+
         Self {
             sys,
             disks,
             networks,
-            mock_running: true, // Default to running for demo
+            mock_running: true,
         }
     }
 

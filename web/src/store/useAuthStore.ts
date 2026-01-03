@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-import axios from 'axios';
+import { apiClient, API_PATHS } from '../api/apiClient';
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -17,7 +16,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             login: async (username, password) => {
                 try {
-                    const response = await axios.post('/api/auth/login', { username, password });
+                    const response = await apiClient.post(API_PATHS.AUTH_LOGIN, { username, password });
                     if (response.data.success) {
                         const token = response.data.obj.token;
                         set({ isAuthenticated: true, token });
@@ -26,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
                     return false;
                 } catch (error) {
                     console.error('Login failed:', error);
-                    return false;
+                    throw error; // Let the caller handle the error
                 }
             },
             logout: () => set({ isAuthenticated: false, token: null }),

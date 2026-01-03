@@ -1,9 +1,9 @@
 #!/bin/bash
 
-red='\033[0;31m'
-green='\033[0;32m'
-yellow='\033[0;33m'
-plain='\033[0m'
+red="\033[0;31m"
+green="\033[0;32m"
+yellow="\033[0;33m"
+plain="\033[0m"
 
 # Check Root
 [[ $EUID -ne 0 ]] && echo -e "\033[0;31mError: Must be root to run this script!\033[0m" && exit 1
@@ -86,7 +86,8 @@ fi
 i18n() {
     local key=$1
     shift
-    printf "${msg[$key]}\n" "$@"
+    local text="${msg[$key]}"
+    echo -e "$(printf "$text" "$@")"
 }
 
 # Detect Arch
@@ -109,7 +110,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.6/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.8/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -237,10 +238,6 @@ install_x_ui() {
         
         read -p "$(i18n "input_root")" web_root
         [[ -z $web_root ]] && web_root="/"
-        # 确保路径以 / 开头
-        [[ ! $web_root =~ ^/ ]] && web_root="/${web_root}"
-        # 确保路径以 / 结尾
-        [[ ! $web_root =~ /$ ]] && web_root="${web_root}/"
         
         # Random JWT secret
         jwt_secret=$(cat /proc/sys/kernel/random/uuid)
@@ -323,17 +320,16 @@ EOF
     i18n "visit_url" "${yellow}http://${public_ip}:${current_port}${current_web_root}${plain}"
     i18n "manage_user" "${yellow}${admin_user}${plain}"
     i18n "manage_pass" "${yellow}${admin_pass}${plain}"
-    i18n "manage_menu" "${yellow}x-ui${plain}"
+    i18n "manage_menu" "${yellow}x-ui-lite${plain}"
     echo -e "${green}----------------------------------------------${plain}"
     i18n "firewall_warn" "${current_port}"
 
-    # Install x-ui management script
-    cat > /usr/bin/x-ui <<EOF
+    cat > /usr/bin/x-ui-lite <<EOF
 #!/bin/bash
-red='\033[0;31m'
-green='\033[0;32m'
-yellow='\033[0;33m'
-plain='\033[0m'
+red="\033[0;31m"
+green="\033[0;32m"
+yellow="\033[0;33m"
+plain="\033[0m"
 
 INSTALL_PATH="/usr/local/x-ui"
 ENV_FILE="\$INSTALL_PATH/.env"
@@ -408,7 +404,8 @@ fi
 i18n() {
     local key=\$1
     shift
-    printf "\${msg[\$key]}\n" "\$@"
+    local text="\${msg[\$key]}"
+    echo -e "\$(printf "\$text" "\$@")"
 }
 
 check_root() {
@@ -483,7 +480,7 @@ uninstall() {
         systemctl stop x-ui
         systemctl disable x-ui
         rm -f /etc/systemd/system/x-ui.service
-        rm -f /usr/bin/x-ui
+        rm -f /usr/bin/x-ui-lite
         rm -rf \$INSTALL_PATH
         systemctl daemon-reload
         i18n "uninstalled"
@@ -551,7 +548,8 @@ else
 fi
 EOF
     
-    chmod +x /usr/bin/x-ui
+    chmod +x /usr/bin/x-ui-lite
+    ln -sf /usr/bin/x-ui-lite /usr/bin/x-ui
 }
 
 # Install Entry

@@ -1,6 +1,6 @@
 # X-UI-Lite 🚀
 
-Ultra-minimalist Xray-Reality panel.
+A high-performance, minimalist X-UI panel exclusively for Xray Reality.
 
 <div align="center">
 

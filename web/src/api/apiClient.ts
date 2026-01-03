@@ -28,8 +28,17 @@ export const API_PATHS = {
 } as const;
 
 // 创建共享的 axios 实例
+const getBaseURL = () => {
+    const root = window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}"
+        ? window.__WEB_ROOT__
+        : '/';
+    // 确保以 / 结尾，并加上 api
+    const normalizedRoot = root.endsWith('/') ? root : `${root}/`;
+    return `${normalizedRoot}api`;
+};
+
 export const apiClient = axios.create({
-    baseURL: '/api',
+    baseURL: getBaseURL(),
     timeout: 60000,
 });
 

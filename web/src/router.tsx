@@ -18,25 +18,15 @@ const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login'
 
 const routeTree = rootRoute.addChildren([indexRoute, inboundsRoute, settingsRoute, loginRoute]);
 
-const getPersistedWebRoot = () => {
-    try {
-        const stored = localStorage.getItem('x-ui-settings-storage');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            const webRoot = parsed.state?.savedPanel?.webRoot;
-            if (webRoot) {
-                return webRoot;
-            }
-        }
-    } catch (e) {
-        console.error('Failed to parse webRoot from storage', e);
+declare global {
+    interface Window {
+        __WEB_ROOT__?: string;
     }
+}
 
-    // 默认值：开发环境使用 /，生产环境使用 /
-    return import.meta.env.DEV ? '/' : '/';
-};
-
-const basepath = getPersistedWebRoot();
+const basepath = window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}"
+    ? window.__WEB_ROOT__
+    : '/';
 
 export const router = createRouter({
     routeTree,

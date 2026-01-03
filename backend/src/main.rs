@@ -11,7 +11,9 @@ mod utils;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
+use axum::extract::State;
 use axum::http::Method;
+use axum::response::IntoResponse;
 use axum::Router;
 use tower_http::cors::CorsLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -214,44 +216,60 @@ async fn main() -> anyhow::Result<()> {
         "./dist".to_string()
     };
 
-    let static_service = tower_http::services::ServeDir::new(dist_path).fallback(
-        tower_http::services::ServeFile::new(format!(
-            "{}/index.html",
-            if std::path::Path::new("../web/dist").exists() {
-                "../web/dist"
-            } else {
-                "./bin/dist"
+    // 动态处理 index.html 的注入
+    let index_dist_path = dist_path.clone();
+    let index_handler = move |State(_): State<()>| async move {
+        let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
+        let path = std::path::Path::new(&index_dist_path).join("index.html");
+
+        match tokio::fs::read_to_string(path).await {
+            Ok(content) => {
+                let replaced = content.replace("{{WEB_ROOT}}", &web_root);
+                (
+                    axum::http::StatusCode::OK,
+                    [(axum::http::header::CONTENT_TYPE, "text/html")],
+                    replaced,
+                )
+                    .into_response()
             }
-        )),
-    );
+            Err(_) => (axum::http::StatusCode::NOT_FOUND, "index.html not found").into_response(),
+        }
+    };
+
+    let static_service = tower_http::services::ServeDir::new(&dist_path);
 
     // 获取 WEB_ROOT (默认 /)
     let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
-    let web_root = if !web_root.starts_with('/') {
+    let mut normalized_web_root = if !web_root.starts_with('/') {
         format!("/{}", web_root)
     } else {
-        web_root
+        web_root.clone()
     };
-    // 确保以 / 结尾以便正确嵌套，或者不以 / 结尾
-    let web_root = web_root.trim_end_matches('/');
-    // root 路由逻辑：如果 web_root 为空，直接挂载 /；否则挂载 /path
+    if !normalized_web_root.ends_with('/') {
+        normalized_web_root = format!("{}/", normalized_web_root);
+    }
 
-    let app = if web_root.is_empty() {
-        Router::new()
-            .merge(api_router)
-            .fallback_service(static_service)
+    // 路由逻辑
+    // API 挂载在 /api，静态文件挂载在 /
+    // Nest 逻辑：
+    // 如果 web_root 是 /，则直接挂载
+    // 如果 web_root 是 /path/，则 nest 到 /path
+    let base_path = normalized_web_root.trim_end_matches('/');
+
+    let router = Router::new()
+        .nest("/api", api_router)
+        .fallback_service(static_service)
+        .fallback(index_handler); // 关键：所有不匹配的路径（SPA 路由）都通过 index_handler 返回注入了 WEB_ROOT 的页面
+
+    let app = if base_path.is_empty() {
+        router.with_state(())
     } else {
-        Router::new().nest(
-            web_root,
-            Router::new()
-                .merge(api_router)
-                .fallback_service(static_service),
-        )
+        Router::new().nest(base_path, router).with_state(())
     };
 
     tracing::info!(
         "Web Root: {}",
-        if web_root.is_empty() { "/" } else { web_root }
+        if web_root.is_empty() { "/" } else { &web_root }
     );
     tracing::info!("安全中间件已启用: CSP, X-Frame-Options, X-XSS-Protection");
 

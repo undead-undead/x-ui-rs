@@ -139,28 +139,7 @@ export const SettingsPage = () => {
                                         />
                                         <p className="text-xs text-gray-400 ml-1">{t('settings.panel_config.web_root_desc')}</p>
                                     </div>
-                                    <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.ssl_cert')}</label>
-                                        <input
 
-                                            type="text"
-                                            value={panel.sslCertPath}
-                                            onChange={(e) => updatePanel({ sslCertPath: e.target.value })}
-                                            className="w-full h-14 px-6 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-blue-500/50 transition-all text-gray-900 font-semibold tracking-tight text-[16px]"
-                                            placeholder="/root/cert.crt"
-                                        />
-                                    </div>
-                                    <div className="space-y-4">
-                                        <label className="text-[13px] font-bold text-gray-500 tracking-tight ml-1">{t('settings.panel_config.ssl_key')}</label>
-                                        <input
-
-                                            type="text"
-                                            value={panel.sslKeyPath}
-                                            onChange={(e) => updatePanel({ sslKeyPath: e.target.value })}
-                                            className="w-full h-14 px-6 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:bg-white focus:border-blue-500/50 transition-all text-gray-900 font-semibold tracking-tight text-[16px]"
-                                            placeholder="/root/private.key"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         )}

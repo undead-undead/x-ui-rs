@@ -196,6 +196,7 @@ pub async fn import_db(
 }
 
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateConfigReq {
     pub web_root: String,
     pub port: u16,

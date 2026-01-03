@@ -216,9 +216,18 @@ install_x_ui() {
     # Download X-UI
     i18n "xui_downloading" "$RELEASE_URL"
     rm -f x-ui-linux-${arch}.tar.gz
-    wget --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
     
-    if [[ $? -ne 0 ]]; then
+    # Use -L to follow redirects from GitHub
+    if command -v wget &> /dev/null; then
+        wget -L --no-check-certificate -O x-ui-linux-${arch}.tar.gz "$RELEASE_URL"
+    elif command -v curl &> /dev/null; then
+        curl -L -o x-ui-linux-${arch}.tar.gz "$RELEASE_URL"
+    else
+        echo -e "${red}Error: Neither wget nor curl is available${plain}"
+        return 1
+    fi
+    
+    if [[ $? -ne 0 ]] || [[ ! -f x-ui-linux-${arch}.tar.gz ]]; then
         i18n "xui_fail"
         return 1
     fi

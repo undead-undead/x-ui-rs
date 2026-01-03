@@ -165,6 +165,10 @@ install_x_ui() {
         
         read -p "请输入面板根路径 (直接回车使用根路径 /，不推荐自定义): " web_root
         [[ -z $web_root ]] && web_root="/"
+        # 确保路径以 / 开头
+        [[ ! $web_root =~ ^/ ]] && web_root="/${web_root}"
+        # 确保路径以 / 结尾
+        [[ ! $web_root =~ /$ ]] && web_root="${web_root}/"
         
         # Random JWT secret
         jwt_secret=$(cat /proc/sys/kernel/random/uuid)
@@ -313,12 +317,15 @@ set_port() {
 
 # 设置 Web Root
 set_web_root() {
-    read -p "请输入面板根路径 (例如 /panel，默认为 /): " path
+    read -p "请输入面板根路径 (例如 /panel/，默认为 /): " path
     [[ -z $path ]] && path="/"
+    # 确保路径以 / 开头
+    [[ ! $path =~ ^/ ]] && path="/${path}"
+    # 确保路径以 / 结尾
+    [[ ! $path =~ /$ ]] && path="${path}/"
     update_env "WEB_ROOT" "$path"
     restart
     echo -e "${green}根路径已修改为: $path${plain}"
-    echo -e "${yellow}注意：修改根路径可能需要配合前端构建配置，否则可能会出现白屏。${plain}"
 }
 
 # 设置账户

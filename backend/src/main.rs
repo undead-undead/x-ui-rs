@@ -138,6 +138,16 @@ async fn main() -> anyhow::Result<()> {
         std::env::set_var("XRAY_CONFIG_PATH", "./data/xray.json");
     }
 
+    // 规范化 WEB_ROOT：确保以 / 开始且以 / 结束
+    let mut web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
+    if !web_root.starts_with('/') {
+        web_root = format!("/{}", web_root);
+    }
+    if !web_root.ends_with('/') {
+        web_root = format!("{}/", web_root);
+    }
+    std::env::set_var("WEB_ROOT", web_root);
+
     // 启动时自动应用一次配置
     if let Err(e) = services::xray_service::apply_config(&pool, monitor.clone()).await {
         tracing::error!("启动时应用配置失败: {}", e);

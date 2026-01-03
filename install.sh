@@ -340,8 +340,9 @@ EOF
     systemctl enable x-ui
     systemctl start x-ui
     
-    # 等待服务启动
-    sleep 2
+    # 等待服务启动并初始化数据库
+    echo -e "${yellow}Waiting for service to initialize...${plain}"
+    sleep 5
     
     # 设置初始账户密码
     i18n "setting_admin"
@@ -357,7 +358,9 @@ EOF
     echo -e "${yellow}Setting up admin account...${plain}"
     $BIN_PATH -u "$admin_user" -p "$admin_pass"
     if [[ $? -ne 0 ]]; then
-        echo -e "${red}Failed to set account! Please check logs.${plain}"
+        echo -e "${red}Failed to set account! Using default: admin/admin${plain}"
+        admin_user="admin"
+        admin_pass="admin"
     fi
     
     # 获取公网IP

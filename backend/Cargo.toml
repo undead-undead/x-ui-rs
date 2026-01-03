@@ -33,7 +33,7 @@ anyhow = "1.0"
 thiserror = "2.0"
 
 # 系统监控
-sysinfo = "0.33"
+sysinfo = { version = "0.33", default-features = false, features = ["system", "cpu", "memory", "disk", "network"] }
 
 # 时间处理
 chrono = { version = "0.4", features = ["serde"] }
@@ -49,14 +49,14 @@ rand_core = { version = "0.6", features = ["getrandom"] }
 
 # 正则表达式（用于输入验证）
 regex = "1.11"
-reqwest = { version = "0.13.1", features = ["json", "stream"] }
-zip = "7.0.0"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+zip = { version = "2.1", default-features = false, features = ["deflate"] }
 futures-util = "0.3.31"
 
 # 内存分配优化
 mimalloc = "0.1"
 [profile.release]
-opt-level = "s"      # 优化大小
+opt-level = "z"      # 极致优化体积和初始内存占用
 lto = "thin"         # 开启链接时优化
 codegen-units = 1    # 提高优化质量
 panic = "abort"      # 移除 panic 展开信息，减小约几百KB体积和内存

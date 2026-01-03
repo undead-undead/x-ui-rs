@@ -109,7 +109,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.2/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.3/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"

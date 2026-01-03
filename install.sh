@@ -342,7 +342,7 @@ EOF
     
     # 等待服务启动并初始化数据库
     echo -e "${yellow}Waiting for service to initialize...${plain}"
-    sleep 5
+    sleep 2
     
     # 设置初始账户密码
     i18n "setting_admin"

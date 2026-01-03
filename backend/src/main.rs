@@ -287,17 +287,8 @@ async fn main() -> anyhow::Result<()> {
     let app = if base_path.is_empty() {
         router.with_state(())
     } else {
-        // 关键修复：当访问不带斜杠的 /subpath 时，重定向到 /subpath/
-        let redirect_path = format!("{}/", base_path);
-        Router::new()
-            .route(
-                base_path,
-                axum::routing::get(move || async move {
-                    axum::response::Redirect::permanent(&redirect_path)
-                }),
-            )
-            .nest(base_path, router)
-            .with_state(())
+        // 使用 nest 处理子路径，Axum 会自动处理前缀剥离
+        Router::new().nest(base_path, router).with_state(())
     };
 
     tracing::info!(

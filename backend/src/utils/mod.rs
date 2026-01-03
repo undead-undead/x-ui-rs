@@ -1,5 +1,6 @@
 // src/utils/mod.rs
 
+pub mod firewall;
 pub mod jwt;
 pub mod password;
 pub mod reality;

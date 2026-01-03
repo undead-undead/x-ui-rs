@@ -21,7 +21,11 @@ pub async fn add_inbound(
     Extension(pool): Extension<SqlitePool>,
     Json(payload): Json<CreateInboundRequest>,
 ) -> ApiResult<ApiResponse<crate::models::inbound::Inbound>> {
+    let port = payload.port;
     let inbound = inbound_service::add_inbound(&pool, payload).await?;
+
+    // 自动放行防火墙端口
+    crate::utils::firewall::open_port(port as u16);
 
     // Automatically apply config change
     xray_service::apply_config(&pool, monitor).await?;
@@ -35,7 +39,13 @@ pub async fn update_inbound(
     Extension(pool): Extension<SqlitePool>,
     Json(payload): Json<UpdateInboundRequest>,
 ) -> ApiResult<ApiResponse<crate::models::inbound::Inbound>> {
+    let port = payload.port;
     let inbound = inbound_service::update_inbound(&pool, payload).await?;
+
+    // 自动放行防火墙端口 (如果端口有修改)
+    if let Some(p) = port {
+        crate::utils::firewall::open_port(p as u16);
+    }
 
     xray_service::apply_config(&pool, monitor).await?;
 

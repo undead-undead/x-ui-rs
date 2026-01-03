@@ -216,9 +216,12 @@ async fn main() -> anyhow::Result<()> {
         "./dist".to_string()
     };
 
+    tracing::info!("Using web dist path: {}", dist_path);
+
     // 动态处理 index.html 的注入
     let index_dist_path = dist_path.clone();
     let index_handler = move |State(_): State<()>| async move {
+        // ... (keep existing logic)
         let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
         let path = std::path::Path::new(&index_dist_path).join("index.html");
 
@@ -232,11 +235,16 @@ async fn main() -> anyhow::Result<()> {
                 )
                     .into_response()
             }
-            Err(_) => (axum::http::StatusCode::NOT_FOUND, "index.html not found").into_response(),
+            Err(e) => {
+                tracing::error!("Failed to read index.html: {}", e);
+                (axum::http::StatusCode::NOT_FOUND, "index.html not found").into_response()
+            }
         }
     };
 
-    let static_service = tower_http::services::ServeDir::new(&dist_path);
+    // Chain the static service with the index fallback
+    let file_service =
+        tower_http::services::ServeDir::new(&dist_path).fallback(axum::routing::get(index_handler));
 
     // 获取 WEB_ROOT (默认 /)
     let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
@@ -258,8 +266,7 @@ async fn main() -> anyhow::Result<()> {
 
     let router = Router::new()
         .nest("/api", api_router)
-        .fallback_service(static_service)
-        .fallback(index_handler); // 关键：所有不匹配的路径（SPA 路由）都通过 index_handler 返回注入了 WEB_ROOT 的页面
+        .fallback_service(file_service); // Use the chained service
 
     let app = if base_path.is_empty() {
         router.with_state(())

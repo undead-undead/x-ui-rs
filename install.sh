@@ -6,7 +6,88 @@ yellow='\033[0;33m'
 plain='\033[0m'
 
 # Check Root
-[[ $EUID -ne 0 ]] && echo -e "${red}错误: 必须使用 root 用户运行此脚本！${plain}" && exit 1
+[[ $EUID -ne 0 ]] && echo -e "\033[0;31mError: Must be root to run this script!\033[0m" && exit 1
+
+# Language Selection
+echo -e "1. 简体中文"
+echo -e "2. English"
+read -p "请选择语言 / Please select language [1-2] (default 1): " lang_choice
+[[ -z $lang_choice ]] && lang_choice="1"
+
+if [[ $lang_choice == "2" ]]; then
+    LANG="en"
+else
+    LANG="zh"
+fi
+
+# Localization
+declare -A msg
+if [[ $LANG == "zh" ]]; then
+    msg[err_root]="${red}错误: 必须使用 root 用户运行此脚本！${plain}"
+    msg[detect_arch]="${green}正在检测系统架构...${plain}"
+    msg[sys_arch]="${green}系统架构: %s${plain}"
+    msg[err_arch]="${red}未检测到支持的系统架构: %s${plain}"
+    msg[install_deps]="${yellow}正在安装依赖...${plain}"
+    msg[open_port]="${yellow}正在尝试放行端口 %s...${plain}"
+    msg[port_opened]="${green}%s 端口 %s 已放行${plain}"
+    msg[bbr_check]="${yellow}正在检测 BBR 状态...${plain}"
+    msg[bbr_on]="${green}BBR 已开启！${plain}"
+    msg[bbr_enabling]="${yellow}正在尝试开启 BBR...${plain}"
+    msg[bbr_fail]="${red}BBR 开启失败，建议升级内核。${plain}"
+    msg[xray_exists]="${green}检测到 Xray Core 已存在，跳过安装${plain}"
+    msg[xray_installing]="${green}正在安装 Xray Core...${plain}"
+    msg[xray_fail]="${red}Xray Core 下载失败，请检查网络！${plain}"
+    msg[xui_installing]="${green}开始安装 X-UI...${plain}"
+    msg[xui_downloading]="${yellow}正在下载发布包: %s${plain}"
+    msg[xui_fail]="${red}下载失败，请检查网络！${plain}"
+    msg[input_port]="请输入面板端口 (默认: 8080): "
+    msg[input_root]="请输入面板根路径 (默认: /): "
+    msg[setting_admin]="${green}正在设置管理员账户...${plain}"
+    msg[input_user]="请输入管理员用户名 (默认: admin): "
+    msg[input_pass]="请输入管理员密码 (默认: admin): "
+    msg[install_success]="${green}X-UI 安装成功！${plain}"
+    msg[visit_url]="访问地址: %s"
+    msg[manage_user]="管理用户: %s"
+    msg[manage_pass]="管理密码: %s"
+    msg[manage_menu]="管理菜单: %s"
+    msg[firewall_warn]="${yellow}如果是云服务器，请务必放行 %s 端口${plain}"
+else
+    msg[err_root]="${red}Error: Must be root to run this script!${plain}"
+    msg[detect_arch]="${green}Detecting system architecture...${plain}"
+    msg[sys_arch]="${green}System Arch: %s${plain}"
+    msg[err_arch]="${red}Unsupported architecture: %s${plain}"
+    msg[install_deps]="${yellow}Installing dependencies...${plain}"
+    msg[open_port]="${yellow}Attempting to open port %s...${plain}"
+    msg[port_opened]="${green}%s port %s opened${plain}"
+    msg[bbr_check]="${yellow}Checking BBR status...${plain}"
+    msg[bbr_on]="${green}BBR is already enabled!${plain}"
+    msg[bbr_enabling]="${yellow}Attempting to enable BBR...${plain}"
+    msg[bbr_fail]="${red}BBR failed to enable, please upgrade kernel.${plain}"
+    msg[xray_exists]="${green}Xray Core detected, skipping installation${plain}"
+    msg[xray_installing]="${green}Installing Xray Core...${plain}"
+    msg[xray_fail]="${red}Xray Core download failed, check network!${plain}"
+    msg[xui_installing]="${green}Starting X-UI installation...${plain}"
+    msg[xui_downloading]="${yellow}Downloading package: %s${plain}"
+    msg[xui_fail]="${red}Download failed, check network!${plain}"
+    msg[input_port]="Please input panel port (default: 8080): "
+    msg[input_root]="Please input panel web root (default: /): "
+    msg[setting_admin]="${green}Setting admin account...${plain}"
+    msg[input_user]="Please input admin username (default: admin): "
+    msg[input_pass]="Please input admin password (default: admin): "
+    msg[install_success]="${green}X-UI installed successfully!${plain}"
+    msg[visit_url]="URL: %s"
+    msg[manage_user]="Username: %s"
+    msg[manage_pass]="Password: %s"
+    msg[manage_menu]="Menu: %s"
+    msg[firewall_warn]="${yellow}Make sure to open port %s in firewall${plain}"
+fi
+
+# Helper function
+i18n() {
+    local key=$1
+    shift
+    printf "${msg[$key]}\n" "$@"
+}
 
 # Detect Arch
 arch=$(arch)
@@ -15,11 +96,11 @@ if [[ $arch == "x86_64" || $arch == "x64" || $arch == "amd64" ]]; then
 elif [[ $arch == "aarch64" || $arch == "arm64" ]]; then
     arch="arm64"
 else
-    echo -e "${red}未检测到支持的系统架构: ${arch}${plain}"
+    i18n "err_arch" "$arch"
     exit 1
 fi
 
-echo -e "${green}系统架构: ${arch}${plain}"
+i18n "sys_arch" "$arch"
 
 # Global Config
 INSTALL_PATH="/usr/local/x-ui"
@@ -31,6 +112,7 @@ SERVICE_FILE="/etc/systemd/system/x-ui.service"
 RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.2/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
+    i18n "install_deps"
     if [[ -f /usr/bin/apt ]]; then
         apt update -y
         apt install -y curl wget tar unzip
@@ -41,14 +123,14 @@ install_dependencies() {
 
 open_port() {
     local port=$1
-    echo -e "${yellow}正在尝试放行端口 ${port}...${plain}"
+    i18n "open_port" "$port"
     
     # Check UFW
     if command -v ufw >/dev/null 2>&1; then
         if ufw status | grep -q "Status: active"; then
             ufw allow ${port}/tcp >/dev/null 2>&1
             ufw allow ${port}/udp >/dev/null 2>&1
-            echo -e "${green}UFW 端口 ${port} 已放行${plain}"
+            i18n "port_opened" "UFW" "$port"
         fi
     fi
     
@@ -58,49 +140,43 @@ open_port() {
             firewall-cmd --permanent --add-port=${port}/tcp >/dev/null 2>&1
             firewall-cmd --permanent --add-port=${port}/udp >/dev/null 2>&1
             firewall-cmd --reload >/dev/null 2>&1
-            echo -e "${green}Firewalld 端口 ${port} 已放行${plain}"
+            i18n "port_opened" "Firewalld" "$port"
         fi
     fi
     
-    # Check iptables (basic fallback)
+    # Check iptables
     if command -v iptables >/dev/null 2>&1; then
         iptables -I INPUT -p tcp --dport ${port} -j ACCEPT >/dev/null 2>&1
         iptables -I INPUT -p udp --dport ${port} -j ACCEPT >/dev/null 2>&1
-        # Save iptables if possible
-        if command -v netfilter-persistent >/dev/null 2>&1; then
-            netfilter-persistent save >/dev/null 2>&1
-        elif command -v service >/dev/null 2>&1 && service iptables status >/dev/null 2>&1; then
-            service iptables save >/dev/null 2>&1
-        fi
-        echo -e "${green}Iptables 端口 ${port} 已放行${plain}"
+        i18n "port_opened" "Iptables" "$port"
     fi
 }
 
 enable_bbr() {
-    echo -e "${yellow}正在检测 BBR 状态...${plain}"
+    i18n "bbr_check"
     if sysctl net.ipv4.tcp_congestion_control | grep -q bbr; then
-        echo -e "${green}BBR 已开启！${plain}"
+        i18n "bbr_on"
         return
     fi
 
-    echo -e "${yellow}正在尝试开启 BBR...${plain}"
+    i18n "bbr_enabling"
     echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
     echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
     sysctl -p
     if sysctl net.ipv4.tcp_congestion_control | grep -q bbr; then
-        echo -e "${green}BBR 开启成功！${plain}"
+        i18n "bbr_on"
     else
-        echo -e "${red}BBR 开启失败，您的内核可能不支持。建议升级内核。${plain}"
+        i18n "bbr_fail"
     fi
 }
 
 install_xray() {
     if [[ -f "$XRAY_BIN_PATH" ]]; then
-        echo -e "${green}检测到 Xray Core 已存在，跳过安装${plain}"
+        i18n "xray_exists"
         return
     fi
 
-    echo -e "${green}正在安装 Xray Core...${plain}"
+    i18n "xray_installing"
     local xray_arch=""
     if [[ $arch == "amd64" ]]; then
         xray_arch="64"
@@ -109,14 +185,11 @@ install_xray() {
     fi
     
     local xray_zip="Xray-linux-${xray_arch}.zip"
-    # 使用官方最新版
     local xray_url="https://github.com/XTLS/Xray-core/releases/latest/download/${xray_zip}"
     
-    echo -e "${yellow}下载地址: ${xray_url}${plain}"
     wget -N --no-check-certificate -q -O /tmp/xray.zip $xray_url
-    
     if [[ $? -ne 0 ]]; then
-        echo -e "${red}Xray Core 下载失败，请检查网络连接！${plain}"
+        i18n "xray_fail"
         return 1
     fi
     
@@ -125,11 +198,10 @@ install_xray() {
     mv /tmp/xray_temp/xray $XRAY_BIN_PATH
     chmod +x $XRAY_BIN_PATH
     rm -rf /tmp/xray_temp /tmp/xray.zip
-    echo -e "${green}Xray Core 安装完成${plain}"
 }
 
 install_x_ui() {
-    echo -e "${green}开始安装 X-UI...${plain}"
+    i18n "xui_installing"
     install_dependencies
 
     # Stop service if running
@@ -141,12 +213,12 @@ install_x_ui() {
     mkdir -p $INSTALL_PATH/logs
 
     # Download X-UI
-    echo -e "${yellow}正在下载发布包: ${RELEASE_URL}${plain}"
+    i18n "xui_downloading" "$RELEASE_URL"
     rm -f x-ui-linux-${arch}.tar.gz
     wget --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
     
     if [[ $? -ne 0 ]]; then
-        echo -e "${red}下载失败，请检查网络连接或手动上传 x-ui-linux-${arch}.tar.gz${plain}"
+        i18n "xui_fail"
         return 1
     fi
 
@@ -159,11 +231,11 @@ install_x_ui() {
 
     # Init .env with default user inputs
     if [[ ! -f $ENV_FILE ]]; then
-        read -p "请输入面板端口 (默认: 8080): " port
+        read -p "$(i18n "input_port")" port
         [[ -z $port ]] && port="8080"
         open_port $port
         
-        read -p "请输入面板根路径 (直接回车使用根路径 /，不推荐自定义): " web_root
+        read -p "$(i18n "input_root")" web_root
         [[ -z $web_root ]] && web_root="/"
         # 确保路径以 / 开头
         [[ ! $web_root =~ ^/ ]] && web_root="/${web_root}"
@@ -210,7 +282,7 @@ EOF
     # Auto Enable BBR
     enable_bbr
 
-    # 确保数据目录和数据库文件存在 (修复 musl SQLite 兼容性问题)
+    # 确保数据目录和数据库文件存在
     mkdir -p $INSTALL_PATH/data
     touch $INSTALL_PATH/data/x-ui.db
     chmod 755 $INSTALL_PATH/data
@@ -223,21 +295,42 @@ EOF
     sleep 2
     
     # 设置初始账户密码
-    echo -e "${green}正在设置管理员账户...${plain}"
-    read -p "请输入管理员用户名 (默认: admin): " admin_user
+    i18n "setting_admin"
+    read -p "$(i18n "input_user")" admin_user
     [[ -z $admin_user ]] && admin_user="admin"
     
-    read -s -p "请输入管理员密码 (默认: admin): " admin_pass
+    read -s -p "$(i18n "input_pass")" admin_pass
     echo
     [[ -z $admin_pass ]] && admin_pass="admin"
     
     # 使用后端命令行工具设置账户
     cd $INSTALL_PATH
-    $BIN_PATH -u "$admin_user" -p "$admin_pass" 2>/dev/null || echo -e "${yellow}注意: 账户设置可能需要手动执行${plain}"
+    $BIN_PATH -u "$admin_user" -p "$admin_pass" 2>/dev/null
+    
+    # 获取公网IP
+    public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")
+    
+    # 从 .env 读取端口和根路径
+    current_port=$(grep "SERVER_PORT" $ENV_FILE | cut -d '=' -f2)
+    [[ -z $current_port ]] && current_port="8080"
+    
+    current_web_root=$(grep "WEB_ROOT" $ENV_FILE | cut -d '=' -f2)
+    [[ -z $current_web_root ]] && current_web_root="/"
+
+    echo -e ""
+    i18n "install_success"
+    echo -e "${green}----------------------------------------------${plain}"
+    i18n "visit_url" "${yellow}http://${public_ip}:${current_port}${current_web_root}${plain}"
+    i18n "manage_user" "${yellow}${admin_user}${plain}"
+    i18n "manage_pass" "${yellow}${admin_pass}${plain}"
+    i18n "manage_menu" "${yellow}x-ui${plain}"
+    echo -e "${green}----------------------------------------------${plain}"
+    i18n "firewall_warn" "${current_port}"
+}
 
 
     # Install x-ui management script
-    cat > /usr/bin/x-ui <<'EOF'
+    cat > /usr/bin/x-ui <<EOF
 #!/bin/bash
 red='\033[0;31m'
 green='\033[0;32m'
@@ -245,145 +338,190 @@ yellow='\033[0;33m'
 plain='\033[0m'
 
 INSTALL_PATH="/usr/local/x-ui"
-ENV_FILE="$INSTALL_PATH/.env"
-BIN_PATH="$INSTALL_PATH/bin/x-ui-backend"
+ENV_FILE="\$INSTALL_PATH/.env"
+BIN_PATH="\$INSTALL_PATH/bin/x-ui-backend"
+
+# Localization
+declare -A msg
+if [[ "$LANG" == "zh" ]]; then
+    msg[menu_title]="X-UI 管理脚本"
+    msg[menu_0]="退出脚本"
+    msg[menu_1]="启动 X-UI"
+    msg[menu_2]="停止 X-UI"
+    msg[menu_3]="重启 X-UI"
+    msg[menu_4]="查看状态"
+    msg[menu_5]="修改面板端口"
+    msg[menu_6]="修改面板根路径"
+    msg[menu_7]="修改账户密码"
+    msg[menu_8]="开启 BBR 加速"
+    msg[menu_9]="查看运行日志"
+    msg[menu_10]="卸载 X-UI"
+    msg[input_choice]="请输入选择 [0-10]: "
+    msg[err_choice]="请输入正确的数字 [0-10]"
+    msg[started]="X-UI 已启动"
+    msg[stopped]="X-UI 已停止"
+    msg[restarted]="X-UI 已重启"
+    msg[input_port]="请输入新端口: "
+    msg[err_port_empty]="端口不能为空"
+    msg[port_changed]="端口已修改为: %s"
+    msg[input_root]="请输入面板根路径 (例如 /panel/，默认为 /): "
+    msg[root_changed]="根路径已修改为: %s"
+    msg[input_user]="请输入新用户名: "
+    msg[input_pass]="请输入新密码: "
+    msg[err_user_pass_empty]="用户名或密码不能为空"
+    msg[account_changed]="账户信息已更新"
+    msg[confirm_uninstall]="确定要卸载 X-UI 吗？[y/N]: "
+    msg[uninstalled]="X-UI 已卸载"
+    msg[cancel_uninstall]="已取消卸载"
+    msg[bbr_on]="BBR 已开启"
+else
+    msg[menu_title]="X-UI Management Script"
+    msg[menu_0]="Exit"
+    msg[menu_1]="Start X-UI"
+    msg[menu_2]="Stop X-UI"
+    msg[menu_3]="Restart X-UI"
+    msg[menu_4]="Check Status"
+    msg[menu_5]="Change Panel Port"
+    msg[menu_6]="Change Web Root"
+    msg[menu_7]="Change Credentials"
+    msg[menu_8]="Enable BBR"
+    msg[menu_9]="Check Logs"
+    msg[menu_10]="Uninstall X-UI"
+    msg[input_choice]="Please enter selection [0-10]: "
+    msg[err_choice]="Please enter a valid number [0-10]"
+    msg[started]="X-UI started"
+    msg[stopped]="X-UI stopped"
+    msg[restarted]="X-UI restarted"
+    msg[input_port]="Enter new port: "
+    msg[err_port_empty]="Port cannot be empty"
+    msg[port_changed]="Port changed to: %s"
+    msg[input_root]="Enter web root (e.g. /panel/, default /): "
+    msg[root_changed]="Web root changed to: %s"
+    msg[input_user]="Enter new username: "
+    msg[input_pass]="Enter new password: "
+    msg[err_user_pass_empty]="Username or password cannot be empty"
+    msg[account_changed]="Credentials updated"
+    msg[confirm_uninstall]="Are you sure to uninstall X-UI? [y/N]: "
+    msg[uninstalled]="X-UI uninstalled"
+    msg[cancel_uninstall]="Uninstall cancelled"
+    msg[bbr_on]="BBR enabled"
+fi
+
+i18n() {
+    local key=\$1
+    shift
+    printf "\${msg[\$key]}\n" "\$@"
+}
 
 check_root() {
-    [[ $EUID -ne 0 ]] && echo -e "${red}错误: 必须使用 root 用户运行此脚本！${plain}" && exit 1
+    [[ \$EUID -ne 0 ]] && echo -e "\${red}Error: Must be root!\${plain}" && exit 1
 }
 
 open_port() {
-    local port=$1
-    echo -e "${yellow}正在尝试放行端口 ${port}...${plain}"
-    
+    local port=\$1
     # Check UFW
     if command -v ufw >/dev/null 2>&1; then
         if ufw status | grep -q "Status: active"; then
-            ufw allow ${port}/tcp >/dev/null 2>&1
-            ufw allow ${port}/udp >/dev/null 2>&1
-            echo -e "${green}UFW 端口 ${port} 已放行${plain}"
+            ufw allow \${port}/tcp >/dev/null 2>&1
+            ufw allow \${port}/udp >/dev/null 2>&1
         fi
     fi
-    
     # Check firewalld
     if command -v firewall-cmd >/dev/null 2>&1; then
         if systemctl is-active --quiet firewalld; then
-            firewall-cmd --permanent --add-port=${port}/tcp >/dev/null 2>&1
-            firewall-cmd --permanent --add-port=${port}/udp >/dev/null 2>&1
+            firewall-cmd --permanent --add-port=\${port}/tcp >/dev/null 2>&1
+            firewall-cmd --permanent --add-port=\${port}/udp >/dev/null 2>&1
             firewall-cmd --reload >/dev/null 2>&1
-            echo -e "${green}Firewalld 端口 ${port} 已放行${plain}"
         fi
-    fi
-    
-    # Check iptables (basic fallback)
-    if command -v iptables >/dev/null 2>&1; then
-        iptables -I INPUT -p tcp --dport ${port} -j ACCEPT >/dev/null 2>&1
-        iptables -I INPUT -p udp --dport ${port} -j ACCEPT >/dev/null 2>&1
-        # Save iptables if possible
-        if command -v netfilter-persistent >/dev/null 2>&1; then
-            netfilter-persistent save >/dev/null 2>&1
-        elif command -v service >/dev/null 2>&1 && service iptables status >/dev/null 2>&1; then
-            service iptables save >/dev/null 2>&1
-        fi
-        echo -e "${green}Iptables 端口 ${port} 已放行${plain}"
     fi
 }
 
-# 辅助函数：修改 .env
 update_env() {
-    local key=$1
-    local val=$2
-    if grep -q "^${key}=" $ENV_FILE; then
-        sed -i "s|^${key}=.*|${key}=${val}|" $ENV_FILE
+    local key=\$1
+    local val=\$2
+    if grep -q "^\${key}=" \$ENV_FILE; then
+        sed -i "s|^\${key}=.*|\${key}=\${val}|" \$ENV_FILE
     else
-        echo "${key}=${val}" >> $ENV_FILE
+        echo "\${key}=\${val}" >> \$ENV_FILE
     fi
 }
 
-start() { systemctl start x-ui && echo -e "${green}X-UI 已启动${plain}"; }
-stop() { systemctl stop x-ui && echo -e "${green}X-UI 已停止${plain}"; }
-restart() { systemctl restart x-ui && echo -e "${green}X-UI 已重启${plain}"; }
+start() { systemctl start x-ui && i18n "started"; }
+stop() { systemctl stop x-ui && i18n "stopped"; }
+restart() { systemctl restart x-ui && i18n "restarted"; }
 status() { systemctl status x-ui; }
 
-# 设置端口
 set_port() {
-    read -p "请输入新端口: " port
-    [[ -z $port ]] && echo -e "${red}端口不能为空${plain}" && return
-    open_port $port
-    update_env "SERVER_PORT" "$port"
+    read -p "\$(i18n "input_port")" port
+    [[ -z \$port ]] && i18n "err_port_empty" && return
+    open_port \$port
+    update_env "SERVER_PORT" "\$port"
     restart
-    echo -e "${green}端口已修改为: $port${plain}"
+    i18n "port_changed" "\$port"
 }
 
-# 设置 Web Root
 set_web_root() {
-    read -p "请输入面板根路径 (例如 /panel/，默认为 /): " path
-    [[ -z $path ]] && path="/"
-    # 确保路径以 / 开头
-    [[ ! $path =~ ^/ ]] && path="/${path}"
-    # 确保路径以 / 结尾
-    [[ ! $path =~ /$ ]] && path="${path}/"
-    update_env "WEB_ROOT" "$path"
+    read -p "\$(i18n "input_root")" path
+    [[ -z \$path ]] && path="/"
+    [[ ! \$path =~ ^/ ]] && path="/\${path}"
+    [[ ! \$path =~ /\$ ]] && path="\${path}/"
+    update_env "WEB_ROOT" "\$path"
     restart
-    echo -e "${green}根路径已修改为: $path${plain}"
+    i18n "root_changed" "\$path"
 }
 
-# 设置账户
 set_account() {
-    read -p "请输入新用户名: " username
-    read -p "请输入新密码: " password
-    [[ -z $username || -z $password ]] && echo -e "${red}用户名或密码不能为空${plain}" && return
-    
-    cd $INSTALL_PATH
-    $BIN_PATH -u "$username" -p "$password"
-    echo -e "${green}账户信息已更新${plain}"
+    read -p "\$(i18n "input_user")" username
+    read -p "\$(i18n "input_pass")" password
+    [[ -z \$username || -z \$password ]] && i18n "err_user_pass_empty" && return
+    cd \$INSTALL_PATH
+    \$BIN_PATH -u "\$username" -p "\$password"
+    i18n "account_changed"
 }
 
-# 卸载
 uninstall() {
-    read -p "确定要卸载 X-UI 吗？[y/N]: " confirm
-    if [[ $confirm == "y" || $confirm == "Y" ]]; then
+    read -p "\$(i18n "confirm_uninstall")" confirm
+    if [[ \$confirm == "y" || \$confirm == "Y" ]]; then
         systemctl stop x-ui
         systemctl disable x-ui
         rm -f /etc/systemd/system/x-ui.service
         rm -f /usr/bin/x-ui
-        rm -rf $INSTALL_PATH
+        rm -rf \$INSTALL_PATH
         systemctl daemon-reload
-        echo -e "${green}X-UI 已卸载${plain}"
+        i18n "uninstalled"
     else
-        echo -e "${yellow}已取消卸载${plain}"
+        i18n "cancel_uninstall"
     fi
 }
 
-# BBR
 enable_bbr() {
     if sysctl net.ipv4.tcp_congestion_control | grep -q bbr; then
-        echo -e "${green}BBR 已经开启${plain}"
+        i18n "bbr_on"
     else
         echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
         echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
         sysctl -p
-        echo -e "${green}BBR 已开启${plain}"
+        i18n "bbr_on"
     fi
 }
 
 show_menu() {
     echo -e "
-  ${green}X-UI 管理脚本${plain}
-  ${green}0.${plain} 退出脚本
-  ${green}1.${plain} 启动 X-UI
-  ${green}2.${plain} 停止 X-UI
-  ${green}3.${plain} 重启 X-UI
-  ${green}4.${plain} 查看状态
-  ${green}5.${plain} 修改面板端口
-  ${green}6.${plain} 修改面板根路径
-  ${green}7.${plain} 修改账户密码
-  ${green}8.${plain} 开启 BBR 加速
-  ${green}9.${plain} 查看运行日志
-  ${green}10.${plain} 卸载 X-UI
+  \${green}\$(i18n "menu_title")\${plain}
+  \${green}0.\${plain} \$(i18n "menu_0")
+  \${green}1.\${plain} \$(i18n "menu_1")
+  \${green}2.\${plain} \$(i18n "menu_2")
+  \${green}3.\${plain} \$(i18n "menu_3")
+  \${green}4.\${plain} \$(i18n "menu_4")
+  \${green}5.\${plain} \$(i18n "menu_5")
+  \${green}6.\${plain} \$(i18n "menu_6")
+  \${green}7.\${plain} \$(i18n "menu_7")
+  \${green}8.\${plain} \$(i18n "menu_8")
+  \${green}9.\${plain} \$(i18n "menu_9")
+  \${green}10.\${plain} \$(i18n "menu_10")
  "
-    read -p "请输入选择 [0-10]: " num
-    case $num in
+    read -p "\$(i18n "input_choice")" num
+    case \$num in
         0) exit 0 ;;
         1) start ;;
         2) stop ;;
@@ -395,13 +533,13 @@ show_menu() {
         8) enable_bbr ;;
         9) journalctl -u x-ui -f ;;
         10) uninstall ;;
-        *) echo -e "${red}请输入正确的数字 [0-10]${plain}" ;;
+        *) i18n "err_choice" ;;
     esac
 }
 
 check_root
-if [[ $# > 0 ]]; then
-    case $1 in
+if [[ \$# > 0 ]]; then
+    case \$1 in
         start) start ;;
         stop) stop ;;
         restart) restart ;;
@@ -416,6 +554,7 @@ fi
 EOF
     
     chmod +x /usr/bin/x-ui
+}
     
     # 获取公网IP (尝试多个源)
     public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")

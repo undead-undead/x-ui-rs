@@ -110,7 +110,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.8/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.9/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -238,6 +238,10 @@ install_x_ui() {
         
         read -p "$(i18n "input_root")" web_root
         [[ -z $web_root ]] && web_root="/"
+        # 强制规范化：确保以 / 开头且以 / 结尾
+        [[ ! $web_root =~ ^/ ]] && web_root="/${web_root}"
+        [[ ! $web_root =~ /$ ]] && web_root="${web_root}/"
+        web_root=$(echo "$web_root" | sed 's|//*|/|g') # 避免多个斜杠
         
         # Random JWT secret
         jwt_secret=$(cat /proc/sys/kernel/random/uuid)
@@ -460,6 +464,7 @@ set_web_root() {
     [[ -z \$path ]] && path="/"
     [[ ! \$path =~ ^/ ]] && path="/\${path}"
     [[ ! \$path =~ /\$ ]] && path="\${path}/"
+    path=\$(echo "\$path" | sed 's|//*|/|g')
     update_env "WEB_ROOT" "\$path"
     restart
     i18n "root_changed" "\$path"

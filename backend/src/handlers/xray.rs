@@ -31,23 +31,31 @@ pub async fn generate_reality_keys() -> Result<Json<RealityKeysResponse>, Status
 
     let stdout = String::from_utf8_lossy(&output.stdout);
 
+    tracing::info!("xray x25519 output: {}", stdout);
+
     // 解析输出
     // 格式：
     // PrivateKey: xxxxx
-    // Password: yyyyy
+    // Password: yyyyy  (这是公钥)
     let mut private_key = String::new();
     let mut public_key = String::new();
 
     for line in stdout.lines() {
-        if line.starts_with("PrivateKey:") {
-            private_key = line.split(':').nth(1).unwrap_or("").trim().to_string();
-        } else if line.starts_with("Password:") {
-            public_key = line.split(':').nth(1).unwrap_or("").trim().to_string();
+        let trimmed = line.trim();
+        if trimmed.starts_with("PrivateKey:") || trimmed.starts_with("Private key:") {
+            private_key = trimmed.split(':').nth(1).unwrap_or("").trim().to_string();
+        } else if trimmed.starts_with("Password:") || trimmed.starts_with("Public key:") {
+            public_key = trimmed.split(':').nth(1).unwrap_or("").trim().to_string();
         }
     }
 
     if private_key.is_empty() || public_key.is_empty() {
-        tracing::error!("Failed to parse xray x25519 output: {}", stdout);
+        tracing::error!(
+            "Failed to parse xray x25519 output. Private: '{}', Public: '{}'",
+            private_key,
+            public_key
+        );
+        tracing::error!("Raw output was: {}", stdout);
         return Err(StatusCode::INTERNAL_SERVER_ERROR);
     }
 

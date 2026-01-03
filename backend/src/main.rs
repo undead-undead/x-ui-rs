@@ -288,14 +288,12 @@ async fn main() -> anyhow::Result<()> {
         router.with_state(())
     } else {
         // 关键修复：当访问不带斜杠的 /subpath 时，重定向到 /subpath/
-        // 否则浏览器无法正确处理 HTML 中的相对路径（assets/...）
-        let base_path_owned = base_path.to_string();
+        let redirect_path = format!("{}/", base_path);
         Router::new()
             .route(
-                &base_path_owned,
-                axum::routing::get(move || {
-                    let path = format!("{}/", base_path_owned);
-                    async move { axum::response::Redirect::permanent(&path) }
+                base_path,
+                axum::routing::get(move || async move {
+                    axum::response::Redirect::permanent(&redirect_path)
                 }),
             )
             .nest(base_path, router)

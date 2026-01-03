@@ -287,7 +287,19 @@ async fn main() -> anyhow::Result<()> {
     let app = if base_path.is_empty() {
         router.with_state(())
     } else {
-        Router::new().nest(base_path, router).with_state(())
+        // 关键修复：当访问不带斜杠的 /subpath 时，重定向到 /subpath/
+        // 否则浏览器无法正确处理 HTML 中的相对路径（assets/...）
+        let base_path_owned = base_path.to_string();
+        Router::new()
+            .route(
+                &base_path_owned,
+                axum::routing::get(move || {
+                    let path = format!("{}/", base_path_owned);
+                    async move { axum::response::Redirect::permanent(&path) }
+                }),
+            )
+            .nest(base_path, router)
+            .with_state(())
     };
 
     tracing::info!(

@@ -31,9 +31,12 @@ impl SystemMonitor {
     }
 
     pub fn get_system_stats(&mut self) -> ApiResult<SysStats> {
-        self.sys.refresh_all();
-        self.disks.refresh(true);
-        self.networks.refresh(true);
+        // 精准刷新：只刷新 CPU 负载和 内存状态，不再刷新所有进程
+        self.sys.refresh_cpu_all();
+        self.sys.refresh_memory();
+        // 0.33 版本的分散刷新语法
+        let _ = self.disks.refresh(true);
+        let _ = self.networks.refresh(true);
 
         // CPU
         let cpu_load = self.sys.global_cpu_usage() as f64;

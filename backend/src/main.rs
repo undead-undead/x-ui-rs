@@ -8,6 +8,9 @@ mod routes;
 mod services;
 mod utils;
 
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 use axum::http::Method;
 use axum::Router;
 use tower_http::cors::CorsLayer;
@@ -52,7 +55,7 @@ RUST_LOG=debug,sqlx=warn
     let _ = std::fs::create_dir_all("bin");
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() -> anyhow::Result<()> {
     // 0. 自动初始化环境 (实现傻瓜式一键运行)
     auto_init_env();

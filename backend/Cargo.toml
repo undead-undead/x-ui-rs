@@ -53,5 +53,8 @@ reqwest = { version = "0.13.1", features = ["json", "stream"] }
 zip = "7.0.0"
 futures-util = "0.3.31"
 
+# 内存分配优化
+mimalloc = "0.1"
+
 [dev-dependencies]
 axum-test = "16.3"

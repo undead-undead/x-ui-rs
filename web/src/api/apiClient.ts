@@ -27,7 +27,7 @@ export const API_PATHS = {
     CLIENTS: '/clients',
 } as const;
 
-// 创建共享的 axios 实例
+// 动态获取 baseURL（每次请求时计算，确保 WEB_ROOT 已注入）
 const getBaseURL = () => {
     const root = window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}"
         ? window.__WEB_ROOT__
@@ -38,13 +38,15 @@ const getBaseURL = () => {
 };
 
 export const apiClient = axios.create({
-    baseURL: getBaseURL(),
     timeout: 60000,
 });
 
-// 请求拦截器：添加 token
+// 请求拦截器：动态设置 baseURL 和添加 token
 apiClient.interceptors.request.use(
     (config) => {
+        // 关键修复：每次请求时动态计算 baseURL
+        config.baseURL = getBaseURL();
+
         const token = useAuthStore.getState().token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;

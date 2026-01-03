@@ -110,7 +110,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.10/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.12/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -230,22 +230,41 @@ install_x_ui() {
     # Install Xray
     install_xray
 
-    # Init .env with default user inputs
+    # Init .env with default user inputs/updates
+    
+    local default_port="8080"
+    local default_web_root="/"
+    
+    # If .env exists, load current values as defaults
+    if [[ -f $ENV_FILE ]]; then
+        local current_port=$(grep "SERVER_PORT" $ENV_FILE | cut -d '=' -f2)
+        local current_root=$(grep "WEB_ROOT" $ENV_FILE | cut -d '=' -f2)
+        [[ ! -z $current_port ]] && default_port=$current_port
+        [[ ! -z $current_root ]] && default_web_root=$current_root
+    fi
+
+    # Input Port
+    printf "$(i18n "input_port")"
+    read -p "($default_port): " port
+    [[ -z $port ]] && port=$default_port
+    open_port $port
+    
+    # Input Web Root
+    printf "$(i18n "input_root")"
+    read -p "($default_web_root): " web_root
+    [[ -z $web_root ]] && web_root=$default_web_root
+    
+    # Normalize Web Root
+    [[ ! $web_root =~ ^/ ]] && web_root="/${web_root}"
+    [[ ! $web_root =~ /$ ]] && web_root="${web_root}/"
+    web_root=$(echo "$web_root" | sed 's|//*|/|g')
+
+    echo -e "${green}Web Root configured as: $web_root${plain}"
+    
+    # Generate/Update .env
     if [[ ! -f $ENV_FILE ]]; then
-        read -p "$(i18n "input_port")" port
-        [[ -z $port ]] && port="8080"
-        open_port $port
-        
-        read -p "$(i18n "input_root")" web_root
-        [[ -z $web_root ]] && web_root="/"
-        # 强制规范化：确保以 / 开头且以 / 结尾
-        [[ ! $web_root =~ ^/ ]] && web_root="/${web_root}"
-        [[ ! $web_root =~ /$ ]] && web_root="${web_root}/"
-        web_root=$(echo "$web_root" | sed 's|//*|/|g') # 避免多个斜杠
-        
-        # Random JWT secret
-        jwt_secret=$(cat /proc/sys/kernel/random/uuid)
-        
+        # New file
+        local jwt_secret=$(cat /proc/sys/kernel/random/uuid)
         cat > $ENV_FILE <<EOF
 DATABASE_URL=sqlite://$INSTALL_PATH/data/x-ui.db
 JWT_SECRET=$jwt_secret
@@ -258,6 +277,12 @@ WEB_ROOT=$web_root
 WEB_DIST_PATH=$INSTALL_PATH/bin/dist
 RUST_LOG=info
 EOF
+    else
+        # Update existing
+        update_env "SERVER_PORT" "$port"
+        update_env "WEB_ROOT" "$web_root"
+        update_env "XRAY_BIN_PATH" "$XRAY_BIN_PATH"
+        update_env "WEB_DIST_PATH" "$INSTALL_PATH/bin/dist"
     fi
 
     # Create Service

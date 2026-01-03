@@ -110,7 +110,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.12/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.13/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -364,9 +364,16 @@ INSTALL_PATH="/usr/local/x-ui"
 ENV_FILE="\$INSTALL_PATH/.env"
 BIN_PATH="\$INSTALL_PATH/bin/x-ui-backend"
 
+# Language settings
+LANG_FILE="\$INSTALL_PATH/.lang"
+if [[ ! -f "\$LANG_FILE" ]]; then
+    echo "$LANG" > "\$LANG_FILE"
+fi
+CUR_LANG=\$(cat "\$LANG_FILE")
+
 # Localization
 declare -A msg
-if [[ "$LANG" == "zh" ]]; then
+if [[ "\$CUR_LANG" == "zh" ]]; then
     msg[menu_title]="X-UI-Lite 管理脚本"
     msg[menu_0]="退出脚本"
     msg[menu_1]="启动 X-UI-Lite"
@@ -379,8 +386,10 @@ if [[ "$LANG" == "zh" ]]; then
     msg[menu_8]="开启 BBR 加速"
     msg[menu_9]="查看运行日志"
     msg[menu_10]="卸载 X-UI-Lite"
-    msg[input_choice]="请输入选择 [0-10]: "
-    msg[err_choice]="请输入正确的数字 [0-10]"
+    msg[menu_11]="切换语言 / Switch Language"
+    msg[input_choice]="请输入选择 [0-11]: "
+    msg[err_choice]="请输入正确的数字 [0-11]"
+    msg[lang_switched]="语言已切换为: 简体中文"
     msg[started]="X-UI-Lite 已启动"
     msg[stopped]="X-UI-Lite 已停止"
     msg[restarted]="X-UI-Lite 已重启"
@@ -410,8 +419,10 @@ else
     msg[menu_8]="Enable BBR"
     msg[menu_9]="Check Logs"
     msg[menu_10]="Uninstall X-UI-Lite"
-    msg[input_choice]="Please enter selection [0-10]: "
-    msg[err_choice]="Please enter a valid number [0-10]"
+    msg[menu_11]="Switch Language / 切换语言"
+    msg[input_choice]="Please enter selection [0-11]: "
+    msg[err_choice]="Please enter a valid number [0-11]"
+    msg[lang_switched]="Language switched to: English"
     msg[started]="X-UI-Lite started"
     msg[stopped]="X-UI-Lite stopped"
     msg[restarted]="X-UI-Lite restarted"
@@ -530,6 +541,15 @@ enable_bbr() {
     fi
 }
 
+switch_lang() {
+    if [[ "\$CUR_LANG" == "zh" ]]; then
+        echo "en" > "\$LANG_FILE"
+    else
+        echo "zh" > "\$LANG_FILE"
+    fi
+    exec "\$0"
+}
+
 show_menu() {
     echo -e "
   \${green}\$(i18n "menu_title")\${plain}
@@ -544,6 +564,7 @@ show_menu() {
   \${green}8.\${plain} \$(i18n "menu_8")
   \${green}9.\${plain} \$(i18n "menu_9")
   \${green}10.\${plain} \$(i18n "menu_10")
+  \${green}11.\${plain} \$(i18n "menu_11")
  "
     read -p "\$(i18n "input_choice")" num
     case \$num in
@@ -558,6 +579,7 @@ show_menu() {
         8) enable_bbr ;;
         9) journalctl -u x-ui -f ;;
         10) uninstall ;;
+        11) switch_lang ;;
         *) i18n "err_choice" ;;
     esac
 }

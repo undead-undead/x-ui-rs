@@ -14,7 +14,16 @@ pub async fn init_pool() -> anyhow::Result<SqlitePool> {
     std::fs::create_dir_all("data")?;
 
     let pool = SqlitePoolOptions::new()
-        .max_connections(5)
+        .max_connections(2) // 进一步压缩连接池
+        .after_connect(|conn, _| {
+            Box::pin(async move {
+                // 限制缓存为 2000 个页面（约 2MB-8MB）
+                sqlx::query("PRAGMA cache_size = 2000;")
+                    .execute(conn)
+                    .await?;
+                Ok(())
+            })
+        })
         .connect(&database_url)
         .await?;
 

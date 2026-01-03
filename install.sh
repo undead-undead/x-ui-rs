@@ -177,6 +177,23 @@ EOF
 
     systemctl enable x-ui
     systemctl start x-ui
+    
+    # 等待服务启动
+    sleep 2
+    
+    # 设置初始账户密码
+    echo -e "${green}正在设置管理员账户...${plain}"
+    read -p "请输入管理员用户名 (默认: admin): " admin_user
+    [[ -z $admin_user ]] && admin_user="admin"
+    
+    read -s -p "请输入管理员密码 (默认: admin): " admin_pass
+    echo
+    [[ -z $admin_pass ]] && admin_pass="admin"
+    
+    # 使用后端命令行工具设置账户
+    cd $INSTALL_PATH
+    $BIN_PATH -u "$admin_user" -p "$admin_pass" 2>/dev/null || echo -e "${yellow}注意: 账户设置可能需要手动执行${plain}"
+
 
     # Install x-ui management script
     cat > /usr/bin/x-ui <<'EOF'
@@ -332,8 +349,8 @@ EOF
     echo -e "${green}X-UI 安装成功！${plain}"
     echo -e "${green}----------------------------------------------${plain}"
     echo -e "访问地址: ${yellow}http://${public_ip}:${current_port}${current_web_root}${plain}"
-    echo -e "默认用户: ${yellow}admin${plain}"
-    echo -e "默认密码: ${yellow}admin${plain}"
+    echo -e "管理用户: ${yellow}${admin_user}${plain}"
+    echo -e "管理密码: ${yellow}${admin_pass}${plain}"
     echo -e "管理菜单: ${yellow}x-ui${plain}"
     echo -e "${green}----------------------------------------------${plain}"
     echo -e "${yellow}如果是云服务器，请务必确保防火墙/安全组已放行 ${current_port} 端口${plain}"

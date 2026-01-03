@@ -289,33 +289,22 @@ async fn main() -> anyhow::Result<()> {
     } else {
         let redirect_path = base_path.clone();
 
-        // 规范化 nest 路径（Axum nest 需要一致的前缀）
+        // 关键：只使用 nest，不使用重合的 route
+        // nest("/112") 会自动处理 "/112" 和 "/112/"
         let nest_path = if base_path.ends_with('/') && base_path.len() > 1 {
-            base_path[..base_path.len() - 1].to_string()
+            &base_path[..base_path.len() - 1]
         } else {
-            base_path.clone()
+            &base_path
         };
 
-        let subpath_no_slash = nest_path.clone();
-        let subpath_with_slash = format!("{}/", subpath_no_slash);
-
         Router::new()
-            // 1. 访问 / 跳转到子路径
             .route(
                 "/",
                 axum::routing::get(move || async move {
                     axum::response::Redirect::permanent(&redirect_path)
                 }),
             )
-            // 2. 访问 /subpath (无斜杠) 跳转到 /subpath/
-            .route(
-                &subpath_no_slash,
-                axum::routing::get(move || async move {
-                    axum::response::Redirect::permanent(&subpath_with_slash)
-                }),
-            )
-            // 3. 实际业务逻辑嵌套
-            .nest(&subpath_no_slash, router)
+            .nest(nest_path, router)
             .with_state(())
     };
 

@@ -126,7 +126,7 @@ install_x_ui() {
         read -p "请输入面板端口 (默认: 8080): " port
         [[ -z $port ]] && port="8080"
         
-        read -p "请输入面板根路径 (默认: /): " web_root
+        read -p "请输入面板根路径 (直接回车使用根路径 /，不推荐自定义): " web_root
         [[ -z $web_root ]] && web_root="/"
         
         # Random JWT secret

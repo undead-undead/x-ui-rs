@@ -230,7 +230,7 @@ async fn main() -> anyhow::Result<()> {
         let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
         let path = std::path::Path::new(&index_dist_path).join("index.html");
 
-        match tokio::fs::read_to_string(path).await {
+        match tokio::fs::read_to_string(&path).await {
             Ok(content) => {
                 let replaced = content.replace("{{WEB_ROOT}}", &web_root);
                 (

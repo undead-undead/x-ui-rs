@@ -27,14 +27,25 @@ export const API_PATHS = {
     CLIENTS: '/clients',
 } as const;
 
-// 动态获取 baseURL（每次请求时计算，确保 WEB_ROOT 已注入）
+// 动态获取 baseURL（自适应智能识别）
 const getBaseURL = () => {
-    const root = window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}"
-        ? window.__WEB_ROOT__
-        : '/';
-    // 确保以 / 结尾，并加上 api
-    const normalizedRoot = root.endsWith('/') ? root : `${root}/`;
-    return `${normalizedRoot}api`;
+    // 1. 优先使用后端注入
+    if (window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}") {
+        const root = window.__WEB_ROOT__;
+        const normalizedRoot = root.endsWith('/') ? root : `${root}/`;
+        return `${normalizedRoot}api`;
+    }
+
+    // 2. 自动嗅探 (与 router.tsx 逻辑一致)
+    const path = window.location.pathname;
+    const segments = path.split('/').filter(Boolean);
+    const topRoutes = ['login', 'inbounds', 'settings', 'dashboard'];
+
+    if (segments.length > 0 && !topRoutes.includes(segments[0])) {
+        return `/${segments[0]}/api`;
+    }
+
+    return '/api';
 };
 
 export const apiClient = axios.create({

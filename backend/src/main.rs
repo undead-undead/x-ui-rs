@@ -287,24 +287,28 @@ async fn main() -> anyhow::Result<()> {
     let app = if base_path.is_empty() || base_path == "/" {
         router.with_state(())
     } else {
-        let redirect_path = base_path.clone();
-
-        // 关键：只使用 nest，不使用重合的 route
-        // nest("/112") 会自动处理 "/112" 和 "/112/"
-        let nest_path = if base_path.ends_with('/') && base_path.len() > 1 {
-            &base_path[..base_path.len() - 1]
-        } else {
-            &base_path
-        };
+        // 关键逻辑：
+        // 1. 确保在 /123 (无斜杠) 时触发重定向到 /123/
+        // 2. 确保 / (根路径) 也重定向到 /123/
+        let subpath = base_path.clone();
+        let subpath_with_slash = format!("{}/", subpath);
+        let redirect_to = subpath_with_slash.clone();
+        let redirect_root = subpath_with_slash.clone();
 
         Router::new()
             .route(
                 "/",
                 axum::routing::get(move || async move {
-                    axum::response::Redirect::permanent(&redirect_path)
+                    axum::response::Redirect::permanent(&redirect_root)
                 }),
             )
-            .nest(nest_path, router)
+            .route(
+                &subpath,
+                axum::routing::get(move || async move {
+                    axum::response::Redirect::permanent(&redirect_to)
+                }),
+            )
+            .nest(&subpath, router)
             .with_state(())
     };
 

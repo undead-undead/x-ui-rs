@@ -109,7 +109,7 @@ XRAY_BIN_PATH="$INSTALL_PATH/bin/xray"
 ENV_FILE="$INSTALL_PATH/.env"
 SERVICE_FILE="/etc/systemd/system/x-ui.service"
 
-RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.4/x-ui-linux-${arch}.tar.gz"
+RELEASE_URL="https://github.com/undead-undead/x-ui-rs/releases/download/v1.1.5/x-ui-linux-${arch}.tar.gz"
 
 install_dependencies() {
     i18n "install_deps"
@@ -326,8 +326,6 @@ EOF
     i18n "manage_menu" "${yellow}x-ui${plain}"
     echo -e "${green}----------------------------------------------${plain}"
     i18n "firewall_warn" "${current_port}"
-}
-
 
     # Install x-ui management script
     cat > /usr/bin/x-ui <<EOF
@@ -555,27 +553,7 @@ EOF
     
     chmod +x /usr/bin/x-ui
 }
-    
-    # 获取公网IP (尝试多个源)
-    public_ip=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me/ip || echo "YOUR_IP")
-    
-    # 从 .env 读取端口和根路径
-    current_port=$(grep "SERVER_PORT" $ENV_FILE | cut -d '=' -f2)
-    [[ -z $current_port ]] && current_port="8080"
-    
-    current_web_root=$(grep "WEB_ROOT" $ENV_FILE | cut -d '=' -f2)
-    [[ -z $current_web_root ]] && current_web_root="/"
-
-    echo -e ""
-    echo -e "${green}X-UI 安装成功！${plain}"
-    echo -e "${green}----------------------------------------------${plain}"
-    echo -e "访问地址: ${yellow}http://${public_ip}:${current_port}${current_web_root}${plain}"
-    echo -e "管理用户: ${yellow}${admin_user}${plain}"
-    echo -e "管理密码: ${yellow}${admin_pass}${plain}"
-    echo -e "管理菜单: ${yellow}x-ui${plain}"
-    echo -e "${green}----------------------------------------------${plain}"
-    echo -e "${yellow}如果是云服务器，请务必确保防火墙/安全组已放行 ${current_port} 端口${plain}"
-}
 
 # Install Entry
 install_x_ui
+

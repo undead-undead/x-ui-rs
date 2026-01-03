@@ -211,7 +211,7 @@ pub struct NetIo {
     pub down: u64,
 }
 
-/// 获取运行日志
+/// 获取运行日志 (优化：只读取文件末尾，避免大文件撑爆内存)
 pub async fn get_logs() -> ApiResult<Vec<String>> {
     let cwd = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
     let log_path = cwd.join("logs").join("error.log");
@@ -219,38 +219,44 @@ pub async fn get_logs() -> ApiResult<Vec<String>> {
 
     let mut logs = Vec::new();
 
-    // Try reading error log
-    if log_path.exists() {
-        if let Ok(content) = tokio::fs::read_to_string(&log_path).await {
-            logs.extend(content.lines().map(|s| format!("[ErrorLog] {}", s)));
+    // 辅助函数：只读取文件最后的一部分
+    async fn read_last_bytes(path: &std::path::Path, limit: u64) -> Vec<String> {
+        use tokio::io::{AsyncReadExt, AsyncSeekExt};
+        let mut file = match tokio::fs::File::open(path).await {
+            Ok(f) => f,
+            Err(_) => return Vec::new(),
+        };
+
+        if let Ok(metadata) = file.metadata().await {
+            let size = metadata.len();
+            let offset = if size > limit { size - limit } else { 0 };
+            let _ = file.seek(std::io::SeekFrom::Start(offset)).await;
         }
+
+        let mut buffer = String::new();
+        let _ = file.read_to_string(&mut buffer).await;
+        buffer.lines().map(|s| s.to_string()).collect()
     }
 
-    // Try reading access log (limit to last 50 lines to avoid spam)
-    if access_log_path.exists() {
-        if let Ok(content) = tokio::fs::read_to_string(&access_log_path).await {
-            let access_lines: Vec<&str> = content.lines().collect();
-            let start = if access_lines.len() > 50 {
-                access_lines.len() - 50
-            } else {
-                0
-            };
-            logs.extend(
-                access_lines[start..]
-                    .iter()
-                    .map(|s| format!("[AccessLog] {}", s)),
-            );
-        }
+    // 只读取最后 32KB 的日志
+    let error_lines = read_last_bytes(&log_path, 32768).await;
+    for line in error_lines {
+        logs.push(format!("[ErrorLog] {}", line));
+    }
+
+    let access_lines = read_last_bytes(&access_log_path, 32768).await;
+    // 访问日志只保留最后 50 条
+    let start = if access_lines.len() > 50 {
+        access_lines.len() - 50
+    } else {
+        0
+    };
+    for line in &access_lines[start..] {
+        logs.push(format!("[AccessLog] {}", line));
     }
 
     if !logs.is_empty() {
-        // Return last 200 lines
-        let start = if logs.len() > 200 {
-            logs.len() - 200
-        } else {
-            0
-        };
-        return Ok(logs[start..].to_vec());
+        return Ok(logs);
     }
 
     // Fallback to journalctl
@@ -262,15 +268,7 @@ pub async fn get_logs() -> ApiResult<Vec<String>> {
     match output {
         Ok(out) if out.status.success() => {
             let logs_str = String::from_utf8_lossy(&out.stdout);
-            let journal_logs: Vec<String> = logs_str.lines().map(|s| s.to_string()).collect();
-
-            if journal_logs.is_empty()
-                || (journal_logs.len() == 1 && journal_logs[0].contains("-- No entries --"))
-            {
-                get_fallback_logs()
-            } else {
-                Ok(journal_logs)
-            }
+            Ok(logs_str.lines().map(|s| s.to_string()).collect())
         }
         _ => get_fallback_logs(),
     }

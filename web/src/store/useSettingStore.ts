@@ -5,8 +5,10 @@ import { useDialogStore } from './useDialogStore';
 const INITIAL_DATA: AllSettings = {
     panel: {
         listenIp: '',
-        port: 0,
-        webRoot: '',
+        // 自动获取当前运行端口
+        port: Number(window.location.port) || (window.location.protocol === 'https:' ? 443 : 80),
+        // 自动获取注入的 WEB_ROOT (优先) 或从 URL 推测
+        webRoot: (window as any).__WEB_ROOT__ || window.location.pathname,
         sslCertPath: '',
         sslKeyPath: ''
     },

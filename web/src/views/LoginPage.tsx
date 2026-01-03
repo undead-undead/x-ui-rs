@@ -45,7 +45,7 @@ export const LoginPage = () => {
                     {/* Brand Title */}
                     <div className="text-center mb-10">
                         <h1 className="text-6xl font-black tracking-tighter text-black">
-                            X-UI-RS
+                            {t('login.title')}
                         </h1>
                     </div>
 

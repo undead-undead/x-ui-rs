@@ -1,6 +1,6 @@
-# X-UI-RS 🚀
+# X-UI-Lite 🚀
 
-A powerful, optimized, and bilingual X-UI panel rewritten in Rust.
+Ultra-minimalist Xray-Reality panel.
 
 <div align="center">
 

@@ -279,7 +279,7 @@ async fn main() -> anyhow::Result<()> {
     let base_path = normalized_web_root.trim_end_matches('/');
 
     let router = Router::new()
-        .nest("/api", api_router) // API 路由优先
+        .merge(api_router) // 直接合并路由，不再重复加 /api 前缀
         .route("/", axum::routing::get(index_handler.clone()))
         .route("/index.html", axum::routing::get(index_handler.clone()))
         .fallback_service(file_service); // 静态文件最后

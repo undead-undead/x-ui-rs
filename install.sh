@@ -104,14 +104,13 @@ install_x_ui() {
     mkdir -p $INSTALL_PATH/logs
 
     # Download X-UI
-    if [[ ! -f "x-ui-linux-${arch}.tar.gz" ]]; then
-        echo -e "${yellow}正在下载发布包: ${RELEASE_URL}${plain}"
-        wget -N --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
-        
-        if [[ $? -ne 0 ]]; then
-            echo -e "${red}下载失败，请检查网络连接或手动上传 x-ui-linux-${arch}.tar.gz${plain}"
-            return 1
-        fi
+    echo -e "${yellow}正在下载发布包: ${RELEASE_URL}${plain}"
+    rm -f x-ui-linux-${arch}.tar.gz
+    wget --no-check-certificate -O x-ui-linux-${arch}.tar.gz $RELEASE_URL
+    
+    if [[ $? -ne 0 ]]; then
+        echo -e "${red}下载失败，请检查网络连接或手动上传 x-ui-linux-${arch}.tar.gz${plain}"
+        return 1
     fi
 
     # Extract

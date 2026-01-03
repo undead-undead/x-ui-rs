@@ -304,16 +304,29 @@ async fn main() -> anyhow::Result<()> {
     let app = if base_path.is_empty() || base_path == "/" {
         router.with_state(())
     } else {
-        let subpath = base_path.clone();
-        // 关键修复：nest 的路径不应该包含末尾斜杠，否则可能匹配不到 /path/
-        let nest_path = subpath.trim_end_matches('/').to_string();
+        let subpath = base_path.clone(); // 例如 "/123"
+                                         // 确保 subpath 不含末尾斜杠 (虽然上面 trims 了，这里再次确保逻辑清晰)
+        let subpath_clean = subpath.trim_end_matches('/').to_string();
 
         Router::new()
-            .nest(&nest_path, router)
+            // 1. 处理 /123 (不带斜杠) -> 跳转到 /123/
+            // 使用动态 redirect，不写死任何路径
+            .route(
+                &subpath_clean,
+                axum::routing::get(
+                    move |req: axum::http::Request<axum::body::Body>| async move {
+                        let path = req.uri().path();
+                        let new_path = format!("{}/", path);
+                        axum::response::Redirect::permanent(&new_path)
+                    },
+                ),
+            )
+            // 2. 处理 /123/... 所有子路径 (包括 /123/)
+            .nest(&subpath_clean, router)
+            // 3. 全局兜底
             .fallback(
                 move |req: axum::http::Request<axum::body::Body>| async move {
-                    // 如果访问根目录且没有被 nest 截获，返回 404 (符合用户隐身需求)
-                    tracing::debug!("Global fallback reached for path: {}", req.uri().path());
+                    tracing::debug!("Global fallback 404: {}", req.uri().path());
                     axum::http::StatusCode::NOT_FOUND.into_response()
                 },
             )

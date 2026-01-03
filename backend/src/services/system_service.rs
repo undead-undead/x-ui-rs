@@ -358,6 +358,8 @@ pub async fn start_xray(monitor: SharedMonitor) -> ApiResult<()> {
         let child = std::process::Command::new(&bin_path_str)
             .arg("-c")
             .arg(&config_path_str)
+            .env("GOMEMLIMIT", "150MiB") // 强制 Go 核心限制内存
+            .env("GOGC", "50") // 更激进的垃圾回收
             .stdout(stdout_file)
             .stderr(stderr_file)
             .spawn();

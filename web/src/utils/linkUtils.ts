@@ -36,6 +36,19 @@ export function generateShareLink(inbound: Inbound, serverAddr: string = window.
                 params.set('host', streamSettings.wsSettings?.headers?.Host || '');
             } else if (streamSettings.network === 'grpc') {
                 params.set('serviceName', streamSettings.grpcSettings?.serviceName || '');
+            } else if (streamSettings.network === 'xhttp') {
+                // 修复：支持 xhttp 的 path 和 host
+                // 注意：后端可能存储在 xhttpSettings 里，字段名可能略有不同，需根据实际类型定义确认
+                // 假设 xhttpSettings 结构类似 { path: string, host: string, mode: string, ... }
+                // 如果后端没有返回 headers.Host，可能需要直接看 host 字段，或者这里根据 Reality/XHTTP 标准
+                // 标准 reality+xhttp 链接通常需要 path 和 host
+                const xhttp = streamSettings.xhttpSettings;
+                if (xhttp) {
+                    if (xhttp.path) params.set('path', xhttp.path);
+                    if (xhttp.host) params.set('host', xhttp.host);
+                    // mode参数也很重要 (auto, packet, etc.)
+                    if (xhttp.mode) params.set('mode', xhttp.mode);
+                }
             }
         }
 
@@ -57,6 +70,13 @@ export function generateShareLink(inbound: Inbound, serverAddr: string = window.
                 params.set('host', streamSettings.wsSettings?.headers?.Host || '');
             } else if (streamSettings.network === 'grpc') {
                 params.set('serviceName', streamSettings.grpcSettings?.serviceName || '');
+            } else if (streamSettings.network === 'xhttp') {
+                const xhttp = streamSettings.xhttpSettings;
+                if (xhttp) {
+                    if (xhttp.path) params.set('path', xhttp.path);
+                    if (xhttp.host) params.set('host', xhttp.host);
+                    if (xhttp.mode) params.set('mode', xhttp.mode);
+                }
             }
         }
 

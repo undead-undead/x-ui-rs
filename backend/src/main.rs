@@ -238,14 +238,36 @@ async fn main() -> anyhow::Result<()> {
 
     // 动态处理 index.html 的注入
     let index_dist_path = dist_path.clone();
-    let index_handler = move |State(_): State<()>| async move {
-        // ... (keep logic)
+    // 动态处理 index.html 的注入
+    let index_dist_path = dist_path.clone();
+    let index_handler = move |req: axum::http::Request<axum::body::Body>| async move {
         let web_root = std::env::var("WEB_ROOT").unwrap_or_else(|_| "/".to_string());
-        let path = std::path::Path::new(&index_dist_path).join("index.html");
 
+        // 关键：如果请求的是资源文件(js/css/etc)但走到了这里，说明文件不存在
+        // 此时必须返回 404 而不是 index.html，否则浏览器报 SyntaxError: Unexpected token '<'
+        let path_str = req.uri().path();
+        if path_str.ends_with(".js")
+            || path_str.ends_with(".css")
+            || path_str.ends_with(".png")
+            || path_str.ends_with(".ico")
+            || path_str.ends_with(".svg")
+            || path_str.ends_with(".woff2")
+        {
+            return (axum::http::StatusCode::NOT_FOUND, "Asset not found").into_response();
+        }
+
+        let path = std::path::Path::new(&index_dist_path).join("index.html");
         match tokio::fs::read_to_string(&path).await {
             Ok(content) => {
-                let replaced = content.replace("{{WEB_ROOT}}", &web_root);
+                // 注入 WEB_ROOT 和 BASE 标签以确保相对路径正确
+                let mut replaced = content.replace("{{WEB_ROOT}}", &web_root);
+
+                // 确保有 <base> 标签处理子路径资源
+                if !replaced.contains("<base") {
+                    let base_tag = format!("<base href=\"{}\">", web_root);
+                    replaced = replaced.replace("<head>", &format!("<head>{}", base_tag));
+                }
+
                 (
                     axum::http::StatusCode::OK,
                     [(axum::http::header::CONTENT_TYPE, "text/html")],

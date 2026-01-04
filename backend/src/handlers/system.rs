@@ -95,17 +95,6 @@ pub async fn get_logs(_user: AuthUser) -> ApiResult<ApiResponse<Vec<String>>> {
     Ok(ApiResponse::success(logs))
 }
 
-/*
-/// POST /api/server/backup
-/// 备份配置
-pub async fn backup(_user: AuthUser) -> ApiResult<ApiResponse<String>> {
-    Ok(ApiResponse::success_with_msg(
-        "Backup feature active".to_string(),
-        "Success",
-    ))
-}
-*/
-
 /// GET /api/server/export-db
 /// 导出数据库文件
 pub async fn export_db(_user: AuthUser) -> impl axum::response::IntoResponse {
@@ -137,19 +126,6 @@ pub async fn export_db(_user: AuthUser) -> impl axum::response::IntoResponse {
         Err(_) => (StatusCode::NOT_FOUND, "Database file not found").into_response(),
     }
 }
-
-/*
-pub struct RestoreRequest {
-    pub backup_id: String,
-}
-
-pub async fn restore(
-    _user: AuthUser,
-    Json(_req): Json<RestoreRequest>,
-) -> ApiResult<ApiResponse<()>> {
-    Ok(ApiResponse::success_no_data("Restore successful"))
-}
-*/
 
 /// POST /api/server/import-db
 /// 导入数据库文件
@@ -268,11 +244,6 @@ pub async fn update_config(
             e
         )));
     }
-
-    // 3. 这里我们不重启服务，由前端在显示提示后，用户手动重启或前端发重启指令
-    // 但为了立即生效，通常需要重启程序。
-    // 在 systemd 环境下，修改面板端口通常需要重启整个服务。
-    // 我们这里只负责改文件。
 
     Ok(ApiResponse::success_no_data("Config updated"))
 }

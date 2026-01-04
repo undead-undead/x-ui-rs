@@ -394,17 +394,12 @@ pub async fn restart_xray(monitor: SharedMonitor) -> ApiResult<()> {
 pub async fn restart_panel() -> ApiResult<()> {
     tracing::info!("Received request to restart X-UI Panel service...");
 
-    // 我们必须在后台延时执行，否则 API 还没返回就被杀掉了
     tokio::spawn(async {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-        // 如果是在 systemd 环境下运行
         let _ = std::process::Command::new("systemctl")
             .arg("restart")
             .arg("x-ui")
             .spawn();
-
-        // 备选：直接重启进程 (如果不使用 systemd)
-        // std::process::exit(0);
     });
 
     Ok(())

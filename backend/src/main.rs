@@ -8,8 +8,8 @@ mod routes;
 mod services;
 mod utils;
 
-#[global_allocator]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+// #[global_allocator]
+// static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 use axum::http::Method;
 use axum::response::IntoResponse;

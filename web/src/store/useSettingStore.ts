@@ -61,7 +61,6 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
 
         // 保存配置
-        // 保存配置
         const updatedPanel = { ...panel, webRoot: normalizedWebRoot };
         set({
             panel: updatedPanel,
@@ -98,10 +97,10 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
                 console.warn("Restart signal failed (this is normal if process killed):", e);
             }
 
-            // 5秒后跳转（面板重启通常很快）
+            // 3秒后跳转（面板重启通常很快）
             setTimeout(() => {
                 window.location.href = fullUrl;
-            }, 5000);
+            }, 3000);
         })();
     },
 
@@ -109,8 +108,6 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     confirmUpdateAuth: () => {
         const { auth } = get();
         const { oldUsername, oldPassword, newUsername, newPassword } = auth;
-
-        console.log("confirmUpdateAuth 被调用", { oldUsername, oldPassword, newUsername, newPassword });
 
         // 验证：只能包含字母和数字
         const alphanumericRegex = /^[a-zA-Z0-9]+$/;
@@ -134,8 +131,6 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
         // 如果没有填写，则沿用原值（实现“只修改密码”或“只修改用户名”）
         const finalUsername = newUsername || oldUsername || 'admin';
         const finalPassword = newPassword || oldPassword;
-
-        console.log("最终值:", { finalUsername, finalPassword });
 
         // 使用确认对话框
         useDialogStore.getState().showConfirm(

@@ -266,10 +266,19 @@ install_x_ui() {
         [[ ! -z $current_root ]] && default_web_root=$current_root
     fi
 
-    # Input Port
-    printf "$(i18n "input_port")"
-    read -p "($default_port): " port < /dev/tty
-    [[ -z $port ]] && port=$default_port
+    # Input Port with validation
+    while true; do
+        printf "$(i18n "input_port")"
+        read -p "($default_port): " port < /dev/tty
+        [[ -z $port ]] && port=$default_port
+        
+        # Validate port range
+        if [[ $port =~ ^[0-9]+$ ]] && [ $port -ge 1024 ] && [ $port -le 65535 ]; then
+            break
+        else
+            echo -e "${red}端口必须在 1024-65535 之间 / Port must be between 1024-65535${plain}"
+        fi
+    done
     open_port $port
     
     # Input Web Root
@@ -349,9 +358,19 @@ EOF
     read -p "$(i18n "input_user")" admin_user < /dev/tty
     [[ -z $admin_user ]] && admin_user="admin"
     
-    read -s -p "$(i18n "input_pass")" admin_pass < /dev/tty
-    echo
-    [[ -z $admin_pass ]] && admin_pass="admin"
+    # Password input with validation
+    while true; do
+        read -s -p "$(i18n "input_pass")" admin_pass < /dev/tty
+        echo
+        [[ -z $admin_pass ]] && admin_pass="admin"
+        
+        # Validate password length
+        if [ ${#admin_pass} -ge 4 ]; then
+            break
+        else
+            echo -e "${red}密码至少需要 4 位 / Password must be at least 4 characters${plain}"
+        fi
+    done
     
     # 设置初始账户密码前先停止服务，避免数据库锁竞争
     systemctl stop x-ui 

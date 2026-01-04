@@ -70,13 +70,11 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
         // 异步调用后端更新 .env
         (async () => {
+            const { sysApi } = await import('../api/system');
             try {
-                const { sysApi } = await import('../api/system');
                 await sysApi.updateConfig(normalizedWebRoot, panel.port);
             } catch (e) {
                 console.error("Failed to update backend config:", e);
-                // 即使后端更新失败，我们也继续跳转流程，或者给个警告？
-                // 最好的做法是如果失败就不要跳转
                 useDialogStore.getState().showAlert("后端配置写入失败，请检查日志", "错误");
                 return;
             }
@@ -89,14 +87,21 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
             // 提示并跳转
             useDialogStore.getState().showAlert(
-                `配置已保存并写入后台！\n\n面板服务可能需要重启生效。\n页面将在 3 秒后尝试跳转到：\n${fullUrl}\n\n⚠️ 请务必记住新地址！\n\n注意：如果您在云服务器上修改了端口，请务必更新防火墙规则！`,
-                "保存成功 - 即将跳转"
+                `配置已保存并写入后台！\n\n面板服务正在重启...\n页面将在 5 秒后尝试跳转到：\n${fullUrl}\n\n⚠️ 请务必记住新地址！\n\n注意：如果您在云服务器上修改了端口，请务必更新防火墙规则！`,
+                "保存成功"
             );
 
-            // 3秒后跳转
+            // 调用重启接口
+            try {
+                await sysApi.restartPanel();
+            } catch (e) {
+                console.warn("Restart signal failed (this is normal if process killed):", e);
+            }
+
+            // 5秒后跳转（面板重启通常很快）
             setTimeout(() => {
                 window.location.href = fullUrl;
-            }, 3000);
+            }, 5000);
         })();
     },
 
@@ -181,8 +186,9 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     restartPanel: () => {
         useDialogStore.getState().showConfirm(
             "强制重启面板服务？这会导致当前所有连接断开。",
-            () => {
+            async () => {
                 const { panel } = get();
+                const { sysApi } = await import('../api/system');
                 set({ isRestarting: true });
 
                 // 显示重启提示
@@ -191,15 +197,21 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
                     "重启中"
                 );
 
+                try {
+                    await sysApi.restartPanel();
+                } catch (e) {
+                    console.warn("Restart signal failed (this is normal if process killed):", e);
+                }
+
                 // 确保 webRoot 格式正确并构造跳转地址
                 const cleanRoot = panel.webRoot.startsWith('/') ? panel.webRoot : `/${panel.webRoot}`;
                 const origin = window.location.origin;
                 const newAddress = `${origin}${cleanRoot}`;
 
-                // 减少延迟时间到 500ms
+                // 重启后等待 3 秒再刷新地址
                 setTimeout(() => {
                     window.location.href = newAddress;
-                }, 500);
+                }, 3000);
             },
             "确认重启"
         );

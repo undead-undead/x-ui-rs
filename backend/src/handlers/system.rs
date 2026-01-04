@@ -30,6 +30,13 @@ pub async fn restart_xray(
     Ok(ApiResponse::success_no_data("Xray service restarted"))
 }
 
+/// POST /api/server/restartPanel
+/// 重启面板服务
+pub async fn restart_panel(_user: AuthUser) -> ApiResult<ApiResponse<()>> {
+    system_service::restart_panel().await?;
+    Ok(ApiResponse::success_no_data("Panel restart command sent"))
+}
+
 /// POST /api/server/stopXray
 /// 停止Xray服务
 pub async fn stop_xray(

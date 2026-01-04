@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Inbound } from '../types/inbound';
 import { inboundApi } from '../api/inbound';
+import { useDialogStore } from './useDialogStore';
 
 interface InboundStore {
     inbounds: Inbound[];
@@ -43,9 +44,18 @@ export const useInboundStore = create<InboundStore>()(
             },
 
             addInbound: async (node: any) => {
-                const res = await inboundApi.createInbound(node);
-                if (res.success) {
-                    await get().fetchInbounds();
+                try {
+                    const res = await inboundApi.createInbound(node);
+                    if (res.success) {
+                        await get().fetchInbounds();
+                    } else {
+                        throw new Error(res.msg || 'Failed to add inbound');
+                    }
+                } catch (error: any) {
+                    console.error('Failed to add inbound:', error);
+                    const errorMsg = error.response?.data?.msg || error.message || 'Unknown error';
+                    useDialogStore.getState().showAlert(errorMsg, 'Error');
+                    throw error; // Re-throw to allow calling component to handle if needed
                 }
             },
 

@@ -24,26 +24,36 @@ declare global {
     }
 }
 
-// 规范化 basepath
-const getNormalizedRoot = () => {
-    let root = (window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}")
-        ? window.__WEB_ROOT__
-        : '/';
-
-    // 确保以 / 开头
-    if (!root.startsWith('/')) root = '/' + root;
-    // 对于非根目录，移除末尾斜杠以适配 TanStack Router 的 basepath 习惯
-    if (root.length > 1 && root.endsWith('/')) {
-        root = root.slice(0, -1);
+// 全自动智能路径识别
+const getAutoDetectedRoot = () => {
+    // 1. 优先使用后端注入的变量
+    if (window.__WEB_ROOT__ && window.__WEB_ROOT__ !== "{{WEB_ROOT}}") {
+        let root = window.__WEB_ROOT__;
+        if (!root.startsWith('/')) root = '/' + root;
+        return root.endsWith('/') && root.length > 1 ? root.slice(0, -1) : root;
     }
-    return root;
+
+    // 2. 自动嗅探逻辑：如果后端没注入（如开发环境），从当前 URL 智能提取
+    const path = window.location.pathname;
+    const segments = path.split('/').filter(Boolean);
+
+    // 已知的顶级功能路由
+    const topRoutes = ['login', 'inbounds', 'settings', 'dashboard'];
+
+    // 如果第一个片段不是路由名，那它极大概率就是 WebRoot
+    if (segments.length > 0 && !topRoutes.includes(segments[0])) {
+        return '/' + segments[0];
+    }
+
+    return '';
 };
 
-const basepath = getNormalizedRoot();
+const basepath = getAutoDetectedRoot();
+console.log('[Router] Detected basepath:', basepath || '/');
 
 export const router = createRouter({
     routeTree,
-    basepath: basepath,
+    basepath: basepath || '/',
     defaultNotFoundComponent: NotFound,
 });
 

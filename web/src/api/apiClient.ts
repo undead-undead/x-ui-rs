@@ -14,6 +14,7 @@ export const API_PATHS = {
     // 服务器相关
     SERVER_SYS_STATS: '/server/sysStats',
     SERVER_RESTART_XRAY: '/server/restartXray',
+    SERVER_RESTART_PANEL: '/server/restartPanel',
     SERVER_START_XRAY: '/server/startXray',
     SERVER_STOP_XRAY: '/server/stopXray',
     SERVER_UPDATE_XRAY: '/server/updateXray',

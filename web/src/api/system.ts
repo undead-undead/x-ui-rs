@@ -34,6 +34,10 @@ export const sysApi = {
         const response = await apiClient.post<ApiResponse>(API_PATHS.SERVER_RESTART_XRAY);
         return response.data;
     },
+    restartPanel: async (): Promise<ApiResponse> => {
+        const response = await apiClient.post<ApiResponse>(API_PATHS.SERVER_RESTART_PANEL);
+        return response.data;
+    },
 
     /**
      * 启动 Xray 服务

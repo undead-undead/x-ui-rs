@@ -35,6 +35,7 @@ pub fn create_router(pool: SqlitePool, monitor: SharedMonitor) -> Router {
     let system_routes = Router::new()
         .route("/sysStats", post(handlers::system::get_sys_stats))
         .route("/restartXray", post(handlers::system::restart_xray))
+        .route("/restartPanel", post(handlers::system::restart_panel))
         .route("/startXray", post(handlers::system::start_xray))
         .route("/stopXray", post(handlers::system::stop_xray))
         .route("/applyConfig", post(handlers::system::apply_config))

@@ -133,6 +133,7 @@
             "path_placeholder": "/xhttp (Recommended) or /",
             "host": "Host",
             "host_placeholder": "Keep empty for default (Optional)",
+            "xhttp_host_placeholder": "Keep empty for default (Optional)",
             "optional": "Optional",
             "security_config": "Security Config",
             "security": "Security Type",

@@ -86,7 +86,9 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
                             <span className="text-gray-600">↓ {formatTraffic(item.down)}</span>
                         </div>
                         <div className="text-[11px] text-gray-400">
-                            / <span className="text-blue-500">{item.total > 0 ? formatTraffic(item.total) : '∞'}</span>
+                            / <span className={item.total > 0 ? "text-blue-500" : "text-gray-400"}>
+                                {item.total > 0 ? formatTraffic(item.total) : '∞'}
+                            </span>
                         </div>
                     </div>
                 </div>

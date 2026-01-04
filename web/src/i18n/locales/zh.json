@@ -133,6 +133,7 @@
             "path_placeholder": "/xhttp (推荐) 或 /",
             "host": "Host",
             "host_placeholder": "留空使用默认值 (可选)",
+            "xhttp_host_placeholder": "留空使用默认值 (可选)",
             "optional": "可选",
             "security_config": "安全层配置",
             "security": "安全类型",

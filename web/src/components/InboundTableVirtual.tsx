@@ -79,7 +79,7 @@ const VirtualInboundRow = memo<VirtualInboundRowProps>(({
                 </div>
 
                 {/* 流量 */}
-                <div className="flex-[2] min-w-0 px-4">
+                <div className="flex-2 min-w-0 px-4">
                     <div className="flex flex-col gap-0.5 text-[12px] font-bold tabular-nums">
                         <div className="flex items-center gap-2">
                             <span className="text-gray-600">↑ {formatTraffic(item.up)}</span>

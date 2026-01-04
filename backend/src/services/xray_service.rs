@@ -125,14 +125,6 @@ pub async fn apply_config(pool: &SqlitePool, monitor: SharedMonitor) -> ApiResul
         stream_settings: None,
     });
 
-    // Add 'api' outbound for internal routing
-    config.outbounds.push(OutboundConfig {
-        tag: "api".to_string(),
-        protocol: "freedom".to_string(),
-        settings: None,
-        stream_settings: None,
-    });
-
     config.outbounds.push(OutboundConfig {
         tag: "blocked".to_string(),
         protocol: "blackhole".to_string(),

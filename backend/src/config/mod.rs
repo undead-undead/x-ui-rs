@@ -1,5 +1,5 @@
 // src/config/mod.rs
 // Configuration module placeholder
-
-// TODO: 实现配置管理
-// 可以使用 config crate 从环境变量和配置文件加载设置
+//
+// Note: Configuration is currently managed via .env file in main.rs
+// using dotenvy crate for environment variable loading.

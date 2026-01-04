@@ -4,6 +4,7 @@ import { useGlobalStore } from '../store/useGlobalStore';
 import { useLogsStore } from '../store/useLogsStore';
 import { useDialogStore } from '../store/useDialogStore';
 import { VersionSelectModal } from '../components/VersionSelectModal';
+import { DASHBOARD_POLLING_INTERVAL } from '../config/constants';
 
 // 性能优化：使用 memo 包裹纯展示组件
 const StatusCircle = memo<{ percent: number; title: string; value: string }>(({ percent, title, value }) => (
@@ -45,7 +46,7 @@ export const Dashboard = () => {
 
     useEffect(() => {
         fetchStatus();
-        const interval = setInterval(fetchStatus, 3000);
+        const interval = setInterval(fetchStatus, DASHBOARD_POLLING_INTERVAL);
         return () => clearInterval(interval);
     }, [fetchStatus]);
 

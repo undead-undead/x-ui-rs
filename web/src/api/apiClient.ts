@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { API_TIMEOUT } from '../config/constants';
 
 /**
  * 共享的 axios 实例配置
@@ -51,7 +52,7 @@ const getBaseURL = () => {
 };
 
 export const apiClient = axios.create({
-    timeout: 60000,
+    timeout: API_TIMEOUT,
 });
 
 // 请求拦截器：动态设置 baseURL 和添加 token

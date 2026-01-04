@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { generateUUID } from '../../utils/uuid';
+import { generateRandomPort } from '../../config/constants';
 import type { Inbound } from '../../types/inbound';
 
 export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => {
@@ -62,7 +63,7 @@ export const useInboundForm = (editingNode: Inbound | null, isOpen: boolean) => 
         setProtocol('vless');
         setTag('');
         setListen('');
-        setPort(String(Math.floor(Math.random() * 50000) + 10000));
+        setPort(String(generateRandomPort()));
         setTotalTraffic('0');
         setExpiryTime('');
         setUuid(generateUUID());

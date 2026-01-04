@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { AllSettings, SettingStore, PanelConfig } from '../types/setting';
 import { useDialogStore } from './useDialogStore';
+import { SETTINGS_REDIRECT_DELAY } from '../config/constants';
 
 const INITIAL_DATA: AllSettings = {
     panel: {
@@ -100,7 +101,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
             // 3秒后跳转（面板重启通常很快）
             setTimeout(() => {
                 window.location.href = fullUrl;
-            }, 3000);
+            }, SETTINGS_REDIRECT_DELAY);
         })();
     },
 
@@ -206,7 +207,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
                 // 重启后等待 3 秒再刷新地址
                 setTimeout(() => {
                     window.location.href = newAddress;
-                }, 3000);
+                }, SETTINGS_REDIRECT_DELAY);
             },
             "确认重启"
         );

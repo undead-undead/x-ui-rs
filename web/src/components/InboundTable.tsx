@@ -106,17 +106,6 @@ const InboundRow = memo<InboundRowProps>(({ item, onToggle, onDelete, onReset, o
             </td>
         </tr>
     );
-}, (prevProps, nextProps) => {
-    // 自定义比较函数：只在关键属性真正改变时才重新渲染
-    return (
-        prevProps.item.id === nextProps.item.id &&
-        prevProps.item.enable === nextProps.item.enable &&
-        prevProps.item.up === nextProps.item.up &&
-        prevProps.item.down === nextProps.item.down &&
-        prevProps.item.remark === nextProps.item.remark &&
-        prevProps.item.protocol === nextProps.item.protocol &&
-        prevProps.item.port === nextProps.item.port
-    );
 });
 
 InboundRow.displayName = 'InboundRow';

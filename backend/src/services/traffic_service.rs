@@ -114,7 +114,7 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
         .arg("api")
         .arg("statsquery")
         .arg("--server=127.0.0.1:10085")
-        // .arg("pattern=") // Default matches all
+        .arg("pattern=")
         .arg("reset=true")
         .output()
         .await

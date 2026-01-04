@@ -49,7 +49,6 @@ const getAutoDetectedRoot = () => {
 };
 
 const basepath = getAutoDetectedRoot();
-console.log('[Router] Detected basepath:', basepath || '/');
 
 export const router = createRouter({
     routeTree,

@@ -46,18 +46,13 @@ export const SettingsPage = () => {
 
     // 性能优化：使用 useCallback 缓存回调函数
     const handleSave = useCallback(() => {
-        console.log("handleSave 被调用，当前标签页:", activeTab);
         if (activeTab === 'panel') {
-            console.log("调用 savePanelConfig");
             savePanelConfig();
         } else if (activeTab === 'user') {
-            console.log("调用 confirmUpdateAuth");
             // 先验证并保存用户信息，然后调用 savePanelConfig 重启
             confirmUpdateAuth();
             // 注意：confirmUpdateAuth 内部会显示确认对话框
             // 用户确认后才会真正保存，所以这里不直接调用 savePanelConfig
-        } else {
-            console.log("当前标签页没有对应的保存逻辑:", activeTab);
         }
     }, [activeTab, savePanelConfig, confirmUpdateAuth]);
 

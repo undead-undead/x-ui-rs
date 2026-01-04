@@ -1,252 +1,32 @@
-import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useModalStore } from '../store/useModalStore';
-import { useInboundStore } from '../store/useInboundStore';
-import { useDialogStore } from '../store/useDialogStore';
+import { useModalStore } from '../../store/useModalStore';
+import { useInboundStore } from '../../store/useInboundStore';
+import { useDialogStore } from '../../store/useDialogStore';
 import { X } from 'lucide-react';
-import { Switch } from './ui/Switch';
-import { generateUUID } from '../utils/uuid';
+import { Switch } from '../ui/Switch';
+import { generateUUID } from '../../utils/uuid';
+import { useInboundForm } from './useInboundForm';
 
 export const AddInboundModal = () => {
     const { t } = useTranslation();
     const { isOpen, closeModal, editingNode } = useModalStore();
     const { addInbound, updateInbound } = useInboundStore();
 
-    // === 基础配置 ===
-    const [remark, setRemark] = useState('');
-    const [isEnable, setIsEnable] = useState(true);
-    const [protocol, setProtocol] = useState('vless');
-    const [tag, setTag] = useState('');
-    const [listen, setListen] = useState('');
-    const [port, setPort] = useState('40754');
-    const [totalTraffic, setTotalTraffic] = useState('0');
-    const [expiryTime, setExpiryTime] = useState('');
-
-    // === 协议配置 ===
-    // VLESS/VMess
-    const [uuid, setUuid] = useState<string>(generateUUID());
-    const [flow, setFlow] = useState('');
-    const [level, setLevel] = useState('0');
-    const [email, setEmail] = useState('');
-
-    // VMess 特有
-    const [alterId, setAlterId] = useState('0');
-
-    // Trojan 特有
-    const [password, setPassword] = useState('');
-
-    // Shadowsocks 特有
-    const [ssMethod, setSsMethod] = useState('chacha20-ietf-poly1305');
-    const [ssPassword, setSsPassword] = useState('');
-    const [ssNetwork, setSsNetwork] = useState('tcp,udp');
-
-    // 通用
-    const [decryption, setDecryption] = useState('none');
-
-    // === 传输层配置 ===
-    const [network, setNetwork] = useState('tcp');
-
-    // WebSocket
-    const [wsPath, setWsPath] = useState('/');
-    const [wsHost, setWsHost] = useState('');
-
-    // gRPC
-    const [grpcServiceName, setGrpcServiceName] = useState('');
-    const [grpcMultiMode, setGrpcMultiMode] = useState(false);
-
-    // HTTP/2
-    const [h2Host, setH2Host] = useState('');
-    const [h2Path, setH2Path] = useState('/');
-
-    // XHTTP
-    const [xhttpMode, setXhttpMode] = useState('auto');
-    const [xhttpPath, setXhttpPath] = useState('/');
-    const [xhttpHost, setXhttpHost] = useState('');
-
-    // === 安全层配置 ===
-    const [security, setSecurity] = useState('none');
-
-    // Reality
-    const [realityShow, setRealityShow] = useState(false);
-    const [realityDest, setRealityDest] = useState('www.microsoft.com:443');
-    const [realityXver, setRealityXver] = useState('0');
-    const [realityFingerprint, setRealityFingerprint] = useState('chrome');
-    const [realityServerNames, setRealityServerNames] = useState('www.microsoft.com');
-    const [realityPrivateKey, setRealityPrivateKey] = useState('');
-    const [realityPublicKey, setRealityPublicKey] = useState('');
-    const [realityShortIds, setRealityShortIds] = useState('');
-    const [realityMinClientVer, setRealityMinClientVer] = useState('');
-    const [realityMaxClientVer, setRealityMaxClientVer] = useState('');
-    const [realityMaxTimeDiff, setRealityMaxTimeDiff] = useState('');
-
-    // === Socket 选项 ===
-    const [acceptProxyProtocol, setAcceptProxyProtocol] = useState(false);
-    const [tcpFastOpen, setTcpFastOpen] = useState(true);
-    const [tcpNoDelay, setTcpNoDelay] = useState(true);
-
-
-
-
-    useEffect(() => {
-        if (isOpen && editingNode) {
-            // 加载编辑数据
-            setRemark(editingNode.remark || '');
-            setIsEnable(editingNode.enable ?? true);
-            setProtocol(editingNode.protocol || 'vless');
-            setTag(editingNode.tag || '');
-            setListen(editingNode.listen || '');
-            setPort(String(editingNode.port || ''));
-            setTotalTraffic(String((editingNode.total || 0) / (1024 * 1024 * 1024)));
-            setExpiryTime(editingNode.expiry ? new Date(editingNode.expiry).toISOString().split('T')[0] : '');
-
-            // 加载协议设置
-            if (editingNode.settings) {
-                const settings = editingNode.settings;
-                if (settings.clients && settings.clients[0]) {
-                    const client = settings.clients[0];
-                    setUuid(client.id || generateUUID());
-                    setFlow(client.flow || '');
-                    setLevel(String(client.level || 0));
-                    setEmail(client.email || '');
-                    setPassword(client.password || '');
-                    setAlterId(String(client.alterId || 0));
-                }
-                setDecryption(settings.decryption || 'none');
-
-                // Shadowsocks
-                if (editingNode.protocol === 'shadowsocks') {
-                    setSsMethod(settings.method || 'chacha20-ietf-poly1305');
-                    setSsPassword(settings.password || '');
-                    setSsNetwork(settings.network || 'tcp,udp');
-                }
-            }
-
-            // 加载传输层设置
-            if (editingNode.streamSettings) {
-                const stream = editingNode.streamSettings;
-                setNetwork(stream.network || 'tcp');
-                setSecurity(stream.security || 'none');
-
-                // WebSocket
-                if (stream.wsSettings) {
-                    setWsPath(stream.wsSettings.path || '/');
-                    setWsHost(stream.wsSettings.headers?.Host || '');
-                }
-
-                // gRPC
-                if (stream.grpcSettings) {
-                    setGrpcServiceName(stream.grpcSettings.serviceName || '');
-                    setGrpcMultiMode(stream.grpcSettings.multiMode || false);
-                }
-
-                // HTTP/2
-                if (stream.httpSettings) {
-                    setH2Host(stream.httpSettings.host?.join(',') || '');
-                    setH2Path(stream.httpSettings.path || '/');
-                }
-
-                // XHTTP
-                if (stream.xhttpSettings) {
-                    setXhttpMode(stream.xhttpSettings.mode || 'auto');
-                    setXhttpPath(stream.xhttpSettings.path || '/');
-                    setXhttpHost(stream.xhttpSettings.host || '');
-                }
-
-
-
-                // Reality
-                if (stream.realitySettings) {
-                    const rs = stream.realitySettings;
-                    setRealityShow(rs.show || false);
-                    setRealityDest(rs.dest || 'www.microsoft.com:443');
-                    setRealityXver(String(rs.xver || 0));
-                    setRealityFingerprint(rs.fingerprint || 'chrome');
-                    setRealityServerNames(rs.serverNames?.join('\n') || 'www.microsoft.com');
-                    setRealityPrivateKey(rs.privateKey || '');
-                    setRealityPublicKey(rs.publicKey || '');
-                    setRealityShortIds(rs.shortIds?.join('\n') || '');
-                    setRealityMinClientVer(rs.minClientVer || '');
-                    setRealityMaxClientVer(rs.maxClientVer || '');
-                    setRealityMaxTimeDiff(String(rs.maxTimeDiff || ''));
-                }
-
-                // Socket 选项
-                if (stream.sockopt) {
-                    setTcpFastOpen(stream.sockopt.tcpFastOpen ?? true);
-                    setTcpNoDelay(stream.sockopt.tcpNoDelay ?? true);
-                }
-
-                setAcceptProxyProtocol(stream.acceptProxyProtocol || false);
-            }
-
-        } else if (isOpen) {
-            // 重置为默认值
-            resetForm();
-            // 自动生成 Reality 密钥对（Base64 格式）
-            generateRealityKeys();
-        }
-    }, [isOpen, editingNode]);
-
-    const resetForm = () => {
-        setRemark('');
-        setIsEnable(true);
-        setProtocol('vless');
-        setTag('');
-        setListen('');
-        setPort(String(Math.floor(Math.random() * 50000) + 10000));
-        setTotalTraffic('0');
-        setExpiryTime('');
-        setUuid(generateUUID());
-        setFlow('');
-        setLevel('0');
-        setEmail('');
-        setAlterId('0');
-        setPassword('');
-        setSsMethod('chacha20-ietf-poly1305');
-        setSsPassword('');
-        setSsNetwork('tcp,udp');
-        setDecryption('none');
-        setNetwork('tcp');
-        setWsPath('/');
-        setWsHost('');
-        setGrpcServiceName('');
-        setGrpcMultiMode(false);
-        setH2Host('');
-        setH2Path('/');
-        setXhttpMode('auto');
-        setXhttpPath('/');
-        setXhttpHost('');
-        setSecurity('none');
-        setRealityShow(false);
-        setRealityDest('www.microsoft.com:443');
-        setRealityXver('0');
-        setRealityFingerprint('chrome');
-        setRealityServerNames('www.microsoft.com');
-        setRealityPrivateKey('');
-        setRealityPublicKey('');
-        setRealityShortIds('');
-        setRealityMinClientVer('');
-        setRealityMaxClientVer('');
-        setRealityMaxTimeDiff('');
-        setAcceptProxyProtocol(false);
-        setTcpNoDelay(true);
-    };
+    // 使用自定义 Hook 管理所有表单状态
+    const form = useInboundForm(editingNode, isOpen);
 
     const generateRealityKeys = async () => {
         try {
-            const { generateRealityKeys: apiGenerateKeys } = await import('../api/xray');
+            const { generateRealityKeys: apiGenerateKeys } = await import('../../api/xray');
             const keys = await apiGenerateKeys();
-            setRealityPrivateKey(keys.private_key);
-            setRealityPublicKey(keys.public_key);
+            form.setRealityPrivateKey(keys.private_key);
+            form.setRealityPublicKey(keys.public_key);
         } catch (error) {
-            console.error('Failed to generate Reality keys:', error);
             useDialogStore.getState().showAlert('生成密钥失败，请重试', '错误');
         }
     };
 
     const generateShortIds = () => {
-        // 生成一个 8 位随机十六进制字符串
-        // 安全获取随机值，处理非 HTTPS 环境
         const randomValues = new Uint8Array(4);
         if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
             crypto.getRandomValues(randomValues);
@@ -257,17 +37,16 @@ export const AddInboundModal = () => {
         }
         const shortId = Array.from(randomValues)
             .map(b => b.toString(16).padStart(2, '0')).join('');
-        setRealityShortIds(shortId);
+        form.setRealityShortIds(shortId);
     };
-
 
     const handleConfirm = async () => {
         // 验证必填项
-        if (!remark.trim()) {
+        if (!form.remark.trim()) {
             useDialogStore.getState().showAlert(t('inbound.modal.remark_empty'), t('common.error') || 'Error');
             return;
         }
-        if (!port || isNaN(Number(port))) {
+        if (!form.port || isNaN(Number(form.port))) {
             useDialogStore.getState().showAlert(t('inbound.modal.port_error'), t('common.error') || 'Error');
             return;
         }
@@ -275,118 +54,118 @@ export const AddInboundModal = () => {
         // 构建协议设置
         let settings: any = {};
 
-        if (protocol === 'vless' || protocol === 'vmess') {
-            if (!uuid) {
+        if (form.protocol === 'vless' || form.protocol === 'vmess') {
+            if (!form.uuid) {
                 useDialogStore.getState().showAlert(t('inbound.modal.uuid_empty'), t('common.error') || 'Error');
                 return;
             }
             settings.clients = [{
-                id: uuid,
-                ...(flow && protocol === 'vless' && { flow }),
-                ...(level && { level: Number(level) }),
-                ...(email && { email }),
-                ...(protocol === 'vmess' && { alterId: Number(alterId) }),
+                id: form.uuid,
+                ...(form.flow && form.protocol === 'vless' && { flow: form.flow }),
+                ...(form.level && { level: Number(form.level) }),
+                ...(form.email && { email: form.email }),
+                ...(form.protocol === 'vmess' && { alterId: Number(form.alterId) }),
             }];
-            if (protocol === 'vless') {
-                settings.decryption = decryption;
+            if (form.protocol === 'vless') {
+                settings.decryption = form.decryption;
             }
-        } else if (protocol === 'trojan') {
-            if (!password) {
+        } else if (form.protocol === 'trojan') {
+            if (!form.password) {
                 useDialogStore.getState().showAlert(t('inbound.modal.password_empty'), t('common.error') || 'Error');
                 return;
             }
             settings.clients = [{
-                password,
-                ...(level && { level: Number(level) }),
-                ...(email && { email }),
+                password: form.password,
+                ...(form.level && { level: Number(form.level) }),
+                ...(form.email && { email: form.email }),
             }];
-        } else if (protocol === 'shadowsocks') {
-            if (!ssPassword) {
+        } else if (form.protocol === 'shadowsocks') {
+            if (!form.ssPassword) {
                 useDialogStore.getState().showAlert(t('inbound.modal.password_empty'), t('common.error') || 'Error');
                 return;
             }
             settings = {
-                method: ssMethod,
-                password: ssPassword,
-                network: ssNetwork,
+                method: form.ssMethod,
+                password: form.ssPassword,
+                network: form.ssNetwork,
             };
         }
 
         // 构建传输层配置
         let streamSettings: any = {
-            network,
-            security,
+            network: form.network,
+            security: form.security,
         };
 
         // 添加传输协议特定配置
-        if (network === 'ws') {
+        if (form.network === 'ws') {
             streamSettings.wsSettings = {
-                path: wsPath,
-                ...(wsHost && { headers: { Host: wsHost } }),
+                path: form.wsPath,
+                ...(form.wsHost && { headers: { Host: form.wsHost } }),
             };
-        } else if (network === 'grpc') {
+        } else if (form.network === 'grpc') {
             streamSettings.grpcSettings = {
-                serviceName: grpcServiceName,
-                multiMode: grpcMultiMode,
+                serviceName: form.grpcServiceName,
+                multiMode: form.grpcMultiMode,
             };
-        } else if (network === 'h2') {
+        } else if (form.network === 'h2') {
             streamSettings.httpSettings = {
-                ...(h2Host && { host: h2Host.split(',').map(h => h.trim()) }),
-                path: h2Path,
+                ...(form.h2Host && { host: form.h2Host.split(',').map(h => h.trim()) }),
+                path: form.h2Path,
             };
-        } else if (network === 'xhttp') {
+        } else if (form.network === 'xhttp') {
             streamSettings.xhttpSettings = {
-                mode: xhttpMode,
-                path: xhttpPath,
-                ...(xhttpHost && { host: xhttpHost }),
+                mode: form.xhttpMode,
+                path: form.xhttpPath,
+                ...(form.xhttpHost && { host: form.xhttpHost }),
             };
         }
 
         // 添加安全层配置
-        if (security === 'reality') {
-            if (!realityPrivateKey) {
+        if (form.security === 'reality') {
+            if (!form.realityPrivateKey) {
                 useDialogStore.getState().showAlert(t('inbound.modal.reality_private_key_empty'), t('common.error') || 'Error');
                 return;
             }
             streamSettings.realitySettings = {
-                show: realityShow,
-                dest: realityDest,
-                xver: Number(realityXver),
-                serverNames: realityServerNames.split('\n').filter(s => s.trim()),
-                privateKey: realityPrivateKey,
-                publicKey: realityPublicKey, // 必须保存公钥，否则无法生成分享链接
-                shortIds: realityShortIds.split('\n').filter(s => s.trim()),
-                fingerprint: realityFingerprint,
-                ...(realityMinClientVer && { minClientVer: realityMinClientVer }),
-                ...(realityMaxClientVer && { maxClientVer: realityMaxClientVer }),
-                ...(realityMaxTimeDiff && { maxTimeDiff: Number(realityMaxTimeDiff) }),
+                show: form.realityShow,
+                dest: form.realityDest,
+                xver: Number(form.realityXver),
+                serverNames: form.realityServerNames.split('\n').filter(s => s.trim()),
+                privateKey: form.realityPrivateKey,
+                publicKey: form.realityPublicKey,
+                shortIds: form.realityShortIds.split('\n').filter(s => s.trim()),
+                fingerprint: form.realityFingerprint,
+                ...(form.realityMinClientVer && { minClientVer: form.realityMinClientVer }),
+                ...(form.realityMaxClientVer && { maxClientVer: form.realityMaxClientVer }),
+                ...(form.realityMaxTimeDiff && { maxTimeDiff: Number(form.realityMaxTimeDiff) }),
             };
         }
 
         // Socket 选项
-        if (tcpFastOpen || tcpNoDelay || acceptProxyProtocol) {
+        if (form.tcpFastOpen || form.tcpNoDelay || form.acceptProxyProtocol) {
             streamSettings.sockopt = {
-                ...(tcpFastOpen && { tcpFastOpen: true }),
-                ...(tcpNoDelay && { tcpNoDelay: true }),
+                ...(form.tcpFastOpen && { tcpFastOpen: true }),
+                ...(form.tcpNoDelay && { tcpNoDelay: true }),
             };
         }
 
-        if (acceptProxyProtocol) {
+        if (form.acceptProxyProtocol) {
             streamSettings.acceptProxyProtocol = true;
         }
 
         const data: any = {
             id: editingNode?.id || generateUUID(),
-            remark,
-            enable: isEnable,
-            port: Number(port),
-            protocol,
-            ...(tag && { tag }),
-            ...(listen && { listen }),
+            remark: form.remark,
+            enable: form.isEnable,
+            port: Number(form.port),
+            protocol: form.protocol,
+            ...(form.tag && { tag: form.tag }),
+            ...(form.listen && { listen: form.listen }),
             settings,
             streamSettings,
-            total: Number(totalTraffic) * 1024 * 1024 * 1024,
-            expiry: expiryTime ? new Date(expiryTime).getTime() : 0,
+            total: Number(form.totalTraffic) * 1024 * 1024 * 1024,
+            expiry: form.expiryTime ? new Date(form.expiryTime).getTime() : 0,
             up: editingNode?.up || 0,
             down: editingNode?.down || 0,
         };
@@ -399,14 +178,11 @@ export const AddInboundModal = () => {
             }
             closeModal();
         } catch (error: any) {
-            // handle error if needed, although store already shows alert
-            console.error('Action failed:', error);
+            // Error already handled by store
         }
     };
 
     if (!isOpen) return null;
-
-
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -435,15 +211,15 @@ export const AddInboundModal = () => {
                                     <span className="text-red-500 mr-1">*</span>{t('inbound.modal.remark')}:
                                 </label>
                                 <input
-                                    value={remark}
-                                    onChange={(e) => setRemark(e.target.value)}
+                                    value={form.remark}
+                                    onChange={(e) => form.setRemark(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none focus:border-blue-500 bg-white"
                                     placeholder={t('inbound.modal.remark_placeholder')}
                                 />
                             </div>
                             <div className="col-span-4 flex items-center gap-3 justify-end">
                                 <label className="text-sm font-bold text-gray-600">{t('inbound.modal.enable')}:</label>
-                                <Switch checked={isEnable} onChange={setIsEnable} />
+                                <Switch checked={form.isEnable} onChange={form.setIsEnable} />
                             </div>
                         </div>
 
@@ -453,8 +229,8 @@ export const AddInboundModal = () => {
                                     <span className="text-red-500 mr-1">*</span>{t('inbound.modal.protocol')}:
                                 </label>
                                 <select
-                                    value={protocol}
-                                    onChange={(e) => setProtocol(e.target.value)}
+                                    value={form.protocol}
+                                    onChange={(e) => form.setProtocol(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none cursor-pointer bg-white"
                                     disabled
                                 >
@@ -467,8 +243,8 @@ export const AddInboundModal = () => {
                                     <span className="text-red-500 mr-1">*</span>{t('inbound.modal.port')}:
                                 </label>
                                 <input
-                                    value={port}
-                                    onChange={(e) => setPort(e.target.value)}
+                                    value={form.port}
+                                    onChange={(e) => form.setPort(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     placeholder={t('inbound.modal.port_placeholder')}
                                 />
@@ -479,8 +255,8 @@ export const AddInboundModal = () => {
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.tag')}:</label>
                                 <input
-                                    value={tag}
-                                    onChange={(e) => setTag(e.target.value)}
+                                    value={form.tag}
+                                    onChange={(e) => form.setTag(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     placeholder={t('inbound.modal.tag_placeholder')}
                                 />
@@ -489,8 +265,8 @@ export const AddInboundModal = () => {
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.listen')}:</label>
                                 <input
-                                    value={listen}
-                                    onChange={(e) => setListen(e.target.value)}
+                                    value={form.listen}
+                                    onChange={(e) => form.setListen(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     placeholder={t('inbound.modal.listen_placeholder')}
                                 />
@@ -501,8 +277,8 @@ export const AddInboundModal = () => {
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.total_traffic')}:</label>
                                 <input
-                                    value={totalTraffic}
-                                    onChange={(e) => setTotalTraffic(e.target.value)}
+                                    value={form.totalTraffic}
+                                    onChange={(e) => form.setTotalTraffic(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     placeholder={t('inbound.modal.total_traffic_placeholder')}
                                 />
@@ -512,8 +288,8 @@ export const AddInboundModal = () => {
                                 <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.expiry_time')}:</label>
                                 <input
                                     type="date"
-                                    value={expiryTime}
-                                    onChange={(e) => setExpiryTime(e.target.value)}
+                                    value={form.expiryTime}
+                                    onChange={(e) => form.setExpiryTime(e.target.value)}
                                     className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none cursor-pointer bg-white"
                                 />
                             </div>
@@ -530,12 +306,12 @@ export const AddInboundModal = () => {
                                 <span className="text-red-500 mr-1">*</span>{t('inbound.modal.uuid')}:
                             </label>
                             <input
-                                value={uuid}
-                                onChange={(e) => setUuid(e.target.value)}
+                                value={form.uuid}
+                                onChange={(e) => form.setUuid(e.target.value)}
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm font-mono outline-none bg-white"
                             />
                             <button
-                                onClick={() => setUuid(generateUUID())}
+                                onClick={() => form.setUuid(generateUUID())}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
                             >
                                 {t('inbound.modal.generate')}
@@ -545,8 +321,8 @@ export const AddInboundModal = () => {
                         <div className="flex items-center gap-3">
                             <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.flow')}:</label>
                             <select
-                                value={flow}
-                                onChange={(e) => setFlow(e.target.value)}
+                                value={form.flow}
+                                onChange={(e) => form.setFlow(e.target.value)}
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                             >
                                 <option value="">{t('inbound.modal.flow_none')}</option>
@@ -563,8 +339,8 @@ export const AddInboundModal = () => {
                         <div className="flex items-center gap-3">
                             <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.network')}:</label>
                             <select
-                                value={network}
-                                onChange={(e) => setNetwork(e.target.value)}
+                                value={form.network}
+                                onChange={(e) => form.setNetwork(e.target.value)}
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                             >
                                 <option value="tcp">TCP</option>
@@ -572,13 +348,13 @@ export const AddInboundModal = () => {
                             </select>
                         </div>
 
-                        {network === 'xhttp' && (
+                        {form.network === 'xhttp' && (
                             <>
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.xhttp_mode')}:</label>
                                     <select
-                                        value={xhttpMode}
-                                        onChange={(e) => setXhttpMode(e.target.value)}
+                                        value={form.xhttpMode}
+                                        onChange={(e) => form.setXhttpMode(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     >
                                         <option value="auto">{t('inbound.modal.xhttp_mode_auto')}</option>
@@ -592,8 +368,8 @@ export const AddInboundModal = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.xhttp_path')}:</label>
                                     <input
-                                        value={xhttpPath}
-                                        onChange={(e) => setXhttpPath(e.target.value)}
+                                        value={form.xhttpPath}
+                                        onChange={(e) => form.setXhttpPath(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                         placeholder={t('inbound.modal.xhttp_path_placeholder')}
                                     />
@@ -602,8 +378,8 @@ export const AddInboundModal = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.xhttp_host')}:</label>
                                     <input
-                                        value={xhttpHost}
-                                        onChange={(e) => setXhttpHost(e.target.value)}
+                                        value={form.xhttpHost}
+                                        onChange={(e) => form.setXhttpHost(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                         placeholder={t('inbound.modal.xhttp_host_placeholder')}
                                     />
@@ -620,11 +396,10 @@ export const AddInboundModal = () => {
                         <div className="flex items-center gap-3">
                             <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.security')}:</label>
                             <select
-                                value={security}
+                                value={form.security}
                                 onChange={(e) => {
-                                    setSecurity(e.target.value);
-                                    // 当选择 Reality 时自动生成短 ID
-                                    if (e.target.value === 'reality' && !realityShortIds) {
+                                    form.setSecurity(e.target.value);
+                                    if (e.target.value === 'reality' && !form.realityShortIds) {
                                         generateShortIds();
                                     }
                                 }}
@@ -637,15 +412,15 @@ export const AddInboundModal = () => {
 
 
 
-                        {security === 'reality' && (
+                        {form.security === 'reality' && (
                             <>
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">
                                         <span className="text-red-500 mr-1">*</span>{t('inbound.modal.reality_dest')}:
                                     </label>
                                     <input
-                                        value={realityDest}
-                                        onChange={(e) => setRealityDest(e.target.value)}
+                                        value={form.realityDest}
+                                        onChange={(e) => form.setRealityDest(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                         placeholder={t('inbound.modal.reality_dest_placeholder')}
                                     />
@@ -654,8 +429,8 @@ export const AddInboundModal = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_server_names')}:</label>
                                     <textarea
-                                        value={realityServerNames}
-                                        onChange={(e) => setRealityServerNames(e.target.value)}
+                                        value={form.realityServerNames}
+                                        onChange={(e) => form.setRealityServerNames(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white resize-none"
                                         rows={2}
                                         placeholder={t('inbound.modal.reality_server_names_placeholder')}
@@ -666,8 +441,8 @@ export const AddInboundModal = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_fingerprint')}:</label>
                                     <select
-                                        value={realityFingerprint}
-                                        onChange={(e) => setRealityFingerprint(e.target.value)}
+                                        value={form.realityFingerprint}
+                                        onChange={(e) => form.setRealityFingerprint(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"
                                     >
                                         <option value="chrome">Chrome</option>
@@ -692,8 +467,8 @@ export const AddInboundModal = () => {
                                         <span className="text-red-500 mr-1">*</span>{t('inbound.modal.reality_private_key')}:
                                     </label>
                                     <input
-                                        value={realityPrivateKey}
-                                        onChange={(e) => setRealityPrivateKey(e.target.value)}
+                                        value={form.realityPrivateKey}
+                                        onChange={(e) => form.setRealityPrivateKey(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm font-mono outline-none bg-white"
                                     />
                                 </div>
@@ -701,8 +476,8 @@ export const AddInboundModal = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_public_key')}:</label>
                                     <input
-                                        value={realityPublicKey}
-                                        onChange={(e) => setRealityPublicKey(e.target.value)}
+                                        value={form.realityPublicKey}
+                                        onChange={(e) => form.setRealityPublicKey(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm font-mono outline-none bg-white"
                                         readOnly
                                     />
@@ -711,8 +486,8 @@ export const AddInboundModal = () => {
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-bold text-gray-600 w-24 text-right shrink-0">{t('inbound.modal.reality_short_ids')}:</label>
                                     <textarea
-                                        value={realityShortIds}
-                                        onChange={(e) => setRealityShortIds(e.target.value)}
+                                        value={form.realityShortIds}
+                                        onChange={(e) => form.setRealityShortIds(e.target.value)}
                                         className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm font-mono outline-none bg-white resize-none"
                                         rows={2}
                                         placeholder={t('inbound.modal.reality_short_ids_placeholder')}
@@ -738,17 +513,17 @@ export const AddInboundModal = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-40 text-right shrink-0">Accept Proxy Protocol:</label>
-                                <Switch checked={acceptProxyProtocol} onChange={setAcceptProxyProtocol} />
+                                <Switch checked={form.acceptProxyProtocol} onChange={form.setAcceptProxyProtocol} />
                             </div>
 
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-40 text-right shrink-0">TCP Fast Open:</label>
-                                <Switch checked={tcpFastOpen} onChange={setTcpFastOpen} />
+                                <Switch checked={form.tcpFastOpen} onChange={form.setTcpFastOpen} />
                             </div>
 
                             <div className="flex items-center gap-3">
                                 <label className="text-sm font-bold text-gray-600 w-40 text-right shrink-0">TCP No Delay:</label>
-                                <Switch checked={tcpNoDelay} onChange={setTcpNoDelay} />
+                                <Switch checked={form.tcpNoDelay} onChange={form.setTcpNoDelay} />
                             </div>
                         </div>
                     </div>

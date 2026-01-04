@@ -148,8 +148,9 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
     for line in stdout.lines() {
         let line = line.trim();
 
-        // Reset state on new object start (JSON "{" or closing "}")
-        if line == "{" || line == "}," || line == "}" {
+        // Reset state on new object start or end
+        // JSON: "{" starts object, "}" or "}," ends object
+        if line == "{" || line.starts_with("}") {
             // If we have both name and value from previous object, insert before reset
             if let (Some(name), Some(value)) = (&current_name, current_value) {
                 stats.insert(name.clone(), value);

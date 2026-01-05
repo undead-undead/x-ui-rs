@@ -46,9 +46,11 @@ impl SystemMonitor {
         // CPU
         let cpu_load = self.sys.global_cpu_usage() as f64;
 
-        // Memory
-        let mem_current = self.sys.used_memory();
+        // Memory - use available_memory for more accurate stats
+        // available_memory excludes reclaimable cache/buffers
         let mem_total = self.sys.total_memory();
+        let mem_available = self.sys.available_memory();
+        let mem_current = mem_total.saturating_sub(mem_available);
 
         // Swap
         let swap_current = self.sys.used_swap();

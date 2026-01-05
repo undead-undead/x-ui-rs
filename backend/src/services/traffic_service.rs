@@ -202,7 +202,7 @@ async fn query_all_xray_stats(xray_bin: &str) -> ApiResult<std::collections::Has
         stats.len()
     );
     for (key, val) in stats.iter().take(5) {
-        tracing::debug!("Sample entry: {} = {}", key, val);
+        tracing::info!("Sample entry: {} = {}", key, val);
     }
 
     Ok(stats)

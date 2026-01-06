@@ -58,7 +58,17 @@ impl SystemMonitor {
             disk_current += disk.total_space() - disk.available_space();
         }
 
-        let uptime = System::uptime();
+        // Use /proc/uptime for accurate uptime relative to boot
+        let uptime = if let Ok(content) = std::fs::read_to_string("/proc/uptime") {
+            content
+                .split_whitespace()
+                .next()
+                .and_then(|s| s.parse::<f64>().ok())
+                .map(|v| v as u64)
+                .unwrap_or_else(System::uptime)
+        } else {
+            System::uptime()
+        };
 
         let load_avg = System::load_average();
         let load = vec![load_avg.one, load_avg.five, load_avg.fifteen];

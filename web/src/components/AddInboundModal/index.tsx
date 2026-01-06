@@ -391,8 +391,13 @@ export const AddInboundModal = () => {
                                 value={form.security}
                                 onChange={(e) => {
                                     form.setSecurity(e.target.value);
-                                    if (e.target.value === 'reality' && !form.realityShortIds) {
-                                        generateShortIds();
+                                    if (e.target.value === 'reality') {
+                                        if (!form.realityShortIds) {
+                                            generateShortIds();
+                                        }
+                                        if (!form.realityPrivateKey) {
+                                            generateRealityKeys();
+                                        }
                                     }
                                 }}
                                 className="flex-1 border border-gray-200 rounded-md px-3 py-2 text-sm outline-none bg-white"

@@ -139,7 +139,7 @@ export const InboundPage = () => {
                         </div>
 
                         <div className="flex-1 flex justify-center">
-                            <div className="flex items-center gap-3 w-auto min-w-fit h-11 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
+                            <div className="flex items-center gap-3 w-auto min-w-fit py-2 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
                                 <div className="flex flex-col flex-1">
                                     <span className="text-[10px] text-gray-500 font-medium leading-tight">{t('inbound.up_total')}</span>
                                     <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalUpload}</span>

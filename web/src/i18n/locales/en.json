@@ -199,9 +199,9 @@
             "alphanumeric_only": "Alphanumeric only"
         },
         "backup": {
-            "title": "Database Backup",
-            "desc": "System supports exporting current .db database file for backup and importing for recovery.",
-            "manage_btn": "Manage Backup & Restore",
+            "title": "Node Backup & Restore",
+            "desc": "System supports exporting and importing the current .db database file.",
+            "manage_btn": "Backup & Restore",
             "modal_title": "Backup & Restore",
             "support_only": "System only supports",
             "db_ext": "format database files",

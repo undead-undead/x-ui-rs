@@ -2,9 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { useInboundStore } from '../store/useInboundStore';
 import { InboundTable } from '../components/InboundTable';
 import { InboundTableVirtual } from '../components/InboundTableVirtual';
-import { Plus, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, CheckCircle2, XCircle, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useModalStore } from '../store/useModalStore';
+import { useBackupModalStore } from '../store/useBackupModalStore';
 import { formatTraffic } from '../utils/format';
 import { useDebouncedValue } from '@mantine/hooks';
 import { checkRealityDomain, quickCheckRealityDomainSync, type DomainCheckResult } from '../utils/realityDomainChecker';
@@ -17,6 +18,7 @@ export const InboundPage = () => {
     const inbounds = useInboundStore((state) => state.inbounds);
     const fetchInbounds = useInboundStore((state) => state.fetchInbounds);
     const openModal = useModalStore((state) => state.openModal);
+    const openBackupModal = useBackupModalStore((state) => state.open);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [realityDomain, setRealityDomain] = useState('');
@@ -120,6 +122,15 @@ export const InboundPage = () => {
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-lg animate-in fade-in slide-in-from-bottom-6 duration-1000">
                     <div className="flex items-center justify-between gap-4 px-8 py-6 border-b border-gray-200">
                         <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => openBackupModal()}
+                                className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                style={{ padding: '5px 24px 4px 24px' }}
+                            >
+                                <Database size={16} strokeWidth={2.5} className="mr-2" />
+                                <span>{t('settings.backup.manage_btn')}</span>
+                            </button>
+
                             <button
                                 onClick={() => openModal()}
                                 className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"

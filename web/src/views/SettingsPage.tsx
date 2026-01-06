@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useSettingStore } from '../store/useSettingStore';
-import { Shield, User, Database, Eye, EyeOff } from 'lucide-react';
-import { useBackupModalStore } from '../store/useBackupModalStore';
+import { Shield, User, Eye, EyeOff } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
 
 export const SettingsPage = () => {
@@ -34,7 +34,6 @@ export const SettingsPage = () => {
     const tabs = useMemo(() => [
         { id: 'panel', label: t('settings.tabs.panel'), icon: Shield },
         { id: 'user', label: t('settings.tabs.user'), icon: User },
-        { id: 'backup', label: t('settings.tabs.backup'), icon: Database },
     ], [t]);
 
     const handleSave = useCallback(() => {
@@ -208,24 +207,7 @@ export const SettingsPage = () => {
                             </div>
                         )}
 
-                        {activeTab === 'backup' && (
-                            <div className="py-24 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in duration-700">
-                                <div className="w-24 h-24 bg-gray-100 border border-gray-200 rounded-4xl flex items-center justify-center text-gray-400 shadow-sm">
-                                    <Database size={48} strokeWidth={1.5} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-700 tracking-tight">{t('settings.backup.title')}</h3>
-                                    <p className="text-gray-500 text-[14px] mt-2.5 font-medium max-w-xs mx-auto">{t('settings.backup.desc')}</p>
-                                </div>
-                                <button
-                                    onClick={() => useBackupModalStore.getState().open()}
-                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
-                                    style={{ padding: '5px 24px 4px 24px' }}
-                                >
-                                    <span>{t('settings.backup.manage_btn')}</span>
-                                </button>
-                            </div>
-                        )}
+
                     </div>
                 </div>
             </div>

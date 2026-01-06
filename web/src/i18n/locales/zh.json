@@ -199,9 +199,9 @@
             "alphanumeric_only": "仅限字母、数字"
         },
         "backup": {
-            "title": "数据库备份",
+            "title": "节点备份与恢复",
             "desc": "系统支持对当前的 .db 数据库文件进行导出备份和导入恢复管理。",
-            "manage_btn": "管理备份与恢复",
+            "manage_btn": "备份与恢复",
             "modal_title": "备份与恢复",
             "support_only": "系统仅支持",
             "db_ext": "格式的数据库文件",

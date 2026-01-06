@@ -211,7 +211,7 @@
             "import_btn": "Import File",
             "export_error": "Export failed",
             "import_success_title": "Import Success",
-            "import_success_msg": "Database imported successfully! Please manually restart panel for changes to take effect.",
+            "import_success_msg": "Database imported successfully! Restarting panel to apply changes...",
             "import_error_title": "Import Failed",
             "import_error_msg": "Import file failed"
         },

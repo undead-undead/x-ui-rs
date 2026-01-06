@@ -211,7 +211,7 @@
             "import_btn": "导入文件",
             "export_error": "导出文件失败",
             "import_success_title": "导入成功",
-            "import_success_msg": "数据库导入成功！需要手动重启面板才能生效。",
+            "import_success_msg": "数据库导入成功！正在自动重启面板以应用更改...",
             "import_error_title": "导入失败",
             "import_error_msg": "文件导入失败"
         },

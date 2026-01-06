@@ -202,10 +202,24 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
         try {
             const { sysApi } = await import('../api/system');
             const response = await sysApi.importDb(file);
+
             useDialogStore.getState().showAlert(
                 response.msg || i18n.t('settings.backup.import_success_msg'),
                 i18n.t('settings.backup.import_success_title')
             );
+
+            // Auto restart panel to apply changes
+            set({ isRestarting: true });
+            try {
+                await sysApi.restartPanel();
+            } catch (e) {
+                console.warn("Restart signal failed (likely connection lost due to restart):", e);
+            }
+
+            setTimeout(() => {
+                window.location.reload();
+            }, SETTINGS_REDIRECT_DELAY);
+
         } catch (error: any) {
             console.error("Import failed:", error);
             const msg = error.response?.data?.msg || i18n.t('settings.backup.import_error_msg');

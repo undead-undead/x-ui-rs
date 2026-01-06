@@ -124,7 +124,8 @@ export const InboundPage = () => {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => openModal()}
-                                className="flex items-center justify-center px-6 h-11 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                style={{ padding: '5px 24px 4px 24px' }}
                             >
                                 <Plus size={16} strokeWidth={3} className="mr-2" />
                                 <span>{t('inbound.modal.title_add')}</span>
@@ -215,7 +216,8 @@ export const InboundPage = () => {
                             <div className="flex items-center gap-6">
                                 <button
                                     onClick={() => openBackupModal()}
-                                    className="flex items-center justify-center px-6 h-11 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
+                                    style={{ padding: '5px 24px 4px 24px' }}
                                 >
                                     <Database size={16} strokeWidth={2.5} className="mr-2" />
                                     <span>{t('settings.backup.manage_btn')}</span>

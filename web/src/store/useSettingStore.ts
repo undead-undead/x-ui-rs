@@ -201,10 +201,10 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     importDb: async (file: File) => {
         try {
             const { sysApi } = await import('../api/system');
-            const response = await sysApi.importDb(file);
+            await sysApi.importDb(file);
 
             useDialogStore.getState().showAlert(
-                response.msg || i18n.t('settings.backup.import_success_msg'),
+                i18n.t('settings.backup.import_success_msg'),
                 i18n.t('settings.backup.import_success_title')
             );
 
@@ -218,7 +218,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
             setTimeout(() => {
                 window.location.reload();
-            }, SETTINGS_REDIRECT_DELAY);
+            }, 3000);
 
         } catch (error: any) {
             console.error("Import failed:", error);

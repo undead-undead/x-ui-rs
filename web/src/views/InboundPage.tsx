@@ -124,8 +124,7 @@ export const InboundPage = () => {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => openModal()}
-                                className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
-                                style={{ padding: '5px 24px 4px 24px' }}
+                                className="flex items-center justify-center px-6 h-11 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
                             >
                                 <Plus size={16} strokeWidth={3} className="mr-2" />
                                 <span>{t('inbound.modal.title_add')}</span>
@@ -181,7 +180,6 @@ export const InboundPage = () => {
                                 >
                                     {isChecking ? t('inbound.checking') : t('inbound.check')}
                                 </button>
-
                                 {displayResult && !isChecking && (
                                     <div className="absolute right-[100px] top-1/2 -translate-y-1/2">
                                         {displayResult.isValid ? (
@@ -191,7 +189,6 @@ export const InboundPage = () => {
                                         )}
                                     </div>
                                 )}
-
                                 {displayResult && !isChecking && (
                                     <div className={`absolute top-full left-0 right-0 mt-2 p-3 rounded-lg text-xs font-medium shadow-lg z-50 ${displayResult.warning
                                         ? 'bg-gray-100 border border-gray-400 text-gray-800'
@@ -218,8 +215,7 @@ export const InboundPage = () => {
                             <div className="flex items-center gap-6">
                                 <button
                                     onClick={() => openBackupModal()}
-                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
-                                    style={{ padding: '5px 24px 4px 24px' }}
+                                    className="flex items-center justify-center px-6 h-11 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none"
                                 >
                                     <Database size={16} strokeWidth={2.5} className="mr-2" />
                                     <span>{t('settings.backup.manage_btn')}</span>

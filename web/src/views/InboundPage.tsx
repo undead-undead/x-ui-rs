@@ -125,7 +125,8 @@ export const InboundPage = () => {
                             <div className="flex flex-col gap-2">
                                 <button
                                     onClick={() => openBackupModal()}
-                                    className="flex items-center justify-center px-5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full h-[31px]"
+                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full"
+                                    style={{ padding: '5px 24px 4px 24px' }}
                                 >
                                     <Database size={16} strokeWidth={2.5} className="mr-2" />
                                     <span>{t('settings.backup.manage_btn')}</span>
@@ -133,7 +134,8 @@ export const InboundPage = () => {
 
                                 <button
                                     onClick={() => openModal()}
-                                    className="flex items-center justify-center px-5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full h-[31px]"
+                                    className="flex items-center justify-center px-5 py-1.5 bg-white text-black rounded-xl text-[13px] font-bold border border-black hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none transition-all shadow-[0_1px_0_0_#94a3b8] whitespace-nowrap leading-none w-full"
+                                    style={{ padding: '5px 24px 4px 24px' }}
                                 >
                                     <Plus size={16} strokeWidth={3} className="mr-2" />
                                     <span>{t('inbound.modal.title_add')}</span>
@@ -145,12 +147,12 @@ export const InboundPage = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t('inbound.search_placeholder')}
-                                className="w-64 h-[70px] px-5 bg-white border border-black rounded-xl outline-none focus:ring-0 transition-all text-black placeholder:text-gray-300 font-bold text-[13px] shadow-[0_1px_0_0_#94a3b8]"
+                                className="w-64 h-11 px-5 bg-white border border-black rounded-xl outline-none focus:ring-0 transition-all text-black placeholder:text-gray-300 font-bold text-[13px] shadow-[0_1px_0_0_#94a3b8]"
                             />
                         </div>
 
                         <div className="flex-1 flex justify-center">
-                            <div className="flex items-center gap-3 w-auto min-w-fit h-[70px] px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
+                            <div className="flex items-center gap-3 w-auto min-w-fit h-11 px-5 bg-white border border-black rounded-xl shadow-[0_1px_0_0_#94a3b8]">
                                 <div className="flex flex-col flex-1">
                                     <span className="text-[10px] text-gray-500 font-medium leading-tight">{t('inbound.up_total')}</span>
                                     <span className="text-[13px] font-bold text-gray-700 tabular-nums">{totalUpload}</span>
@@ -179,13 +181,13 @@ export const InboundPage = () => {
                                     onChange={(e) => setRealityDomain(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleCheckDomain()}
                                     placeholder={t('inbound.reality_check_placeholder')}
-                                    className="w-72 h-[70px] px-5 pr-[120px] bg-white border border-black rounded-xl outline-none focus:ring-0 transition-all text-black placeholder:text-gray-300 font-bold text-[13px] shadow-[0_1px_0_0_#94a3b8]"
+                                    className="w-72 h-11 px-5 pr-[120px] bg-white border border-black rounded-xl outline-none focus:ring-0 transition-all text-black placeholder:text-gray-300 font-bold text-[13px] shadow-[0_1px_0_0_#94a3b8]"
                                 />
 
                                 <button
                                     onClick={handleCheckDomain}
                                     disabled={!realityDomain.trim() || isChecking}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white text-black border border-black rounded-xl text-[13px] font-bold hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_1px_0_0_#94a3b8] transition-all shadow-[0_1px_0_0_#94a3b8] flex items-center leading-none"
+                                    className="absolute right-3 top-[10px] bg-white text-black border border-black rounded-xl text-[13px] font-bold hover:-translate-y-[2px] hover:shadow-[0_4px_0_0_#94a3b8] active:translate-y-px active:shadow-none disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_1px_0_0_#94a3b8] transition-all shadow-[0_1px_0_0_#94a3b8] flex items-center leading-none"
                                     style={{ padding: '5px 24px 4px 24px' }}
                                 >
                                     {isChecking ? t('inbound.checking') : t('inbound.check')}

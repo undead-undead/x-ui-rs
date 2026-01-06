@@ -11,6 +11,7 @@ pub struct SystemMonitor {
     disks: Disks,
     networks: Networks,
     mock_running: bool,
+    start_time: std::time::Instant,
 }
 
 impl SystemMonitor {
@@ -27,6 +28,7 @@ impl SystemMonitor {
             disks,
             networks,
             mock_running: true,
+            start_time: std::time::Instant::now(),
         }
     }
 
@@ -58,17 +60,8 @@ impl SystemMonitor {
             disk_current += disk.total_space() - disk.available_space();
         }
 
-        // Use /proc/uptime for accurate uptime relative to boot
-        let uptime = if let Ok(content) = std::fs::read_to_string("/proc/uptime") {
-            content
-                .split_whitespace()
-                .next()
-                .and_then(|s| s.parse::<f64>().ok())
-                .map(|v| v as u64)
-                .unwrap_or_else(System::uptime)
-        } else {
-            System::uptime()
-        };
+        // Use application uptime instead of system uptime
+        let uptime = self.start_time.elapsed().as_secs();
 
         let load_avg = System::load_average();
         let load = vec![load_avg.one, load_avg.five, load_avg.fifteen];

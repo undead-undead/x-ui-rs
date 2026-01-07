@@ -47,4 +47,22 @@ If you like this project, you can buy me a coffee to support the development!
 
 ## 📜 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License with Additional Terms**.
+
+### For Users
+You are free to use, modify, and distribute this software.
+
+### For Fork Creators
+If you fork or redistribute this project, you **MUST**:
+
+1. ✅ **Keep original sponsor links intact** - Do not remove or replace the "☕ 赞助项目" button or any sponsor links
+2. ✅ **Clearly indicate it's a fork** - State that your version is derived from [x-ui-rs](https://github.com/undead-undead/x-ui-rs)
+3. ✅ **Credit the original author** - Maintain attribution in README and UI
+4. ✅ **No misrepresentation** - Do not claim your fork is the official version
+
+You may add your own sponsor links **alongside** the original ones, but **cannot remove** the original.
+
+**Violation of these terms may result in license termination and DMCA takedown.**
+
+See [LICENSE](./LICENSE) for full details.
+
